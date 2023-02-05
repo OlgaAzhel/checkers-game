@@ -1,10 +1,12 @@
 define([
     'require',
     'kings'
-], function (require, kingsImportValueWhateverItIs) {
+], function (require, allowedMovesKing, mandatoryJumpsKing, boardArrIntoIds) {
     'use strict';
-    const myFunction = kingsImportValueWhateverItIs.myFunction
-    const exportedNameForMyVar = kingsImportValueWhateverItIs.exportedNameForMyVar
+        allowedMovesKing,
+        mandatoryJumpsKing,
+        boardArrIntoIds
+
 
 
     const cellState = {
@@ -41,7 +43,7 @@ define([
     // need for guard option -  an array of cells divs only
     let cells = [...document.querySelectorAll('#board > div')]
     // This event listener should be set up on array of els returned from  findActivPieces()
-    document.getElementById('board').addEventListener('click', allowedMoves)
+    let clickListen = document.getElementById('board').addEventListener('click', allowedMoves)
 
 
     function allowedMoves(evt) {
@@ -59,6 +61,7 @@ define([
         // if current board cell has value 1 or -1
         if (board[curRowIdx][curColIdx] === turn) {
             let availableMoves = []
+            console.log("Its a regular piece")
             // for being open for the move cells must be empty, be on the next row and have columns values + 1 and -1 from current:
             //index of the next row in the board array:
             let checkRow = curRowIdx + turn
@@ -119,10 +122,10 @@ define([
                 //this is the array of cells that need to be empty for JUMP
                 let emptyCheck = [board[checkRowIfEmpty][curColIdx + 2], board[checkRowIfEmpty][curColIdx - 2]]
                 let emptyCheckIds = [`r${checkRowIfEmpty}c${curColIdx + 2}`, `r${checkRowIfEmpty}c${curColIdx - 2}`]
-                console.log(emptyCheck)
+                console.log(emptyCheck, emptyCheckIds)
                 //choosing cells to highlight for mandatory jump
                 checkCellsIfEmpty.forEach((el) => {
-                    if (checkOppCells[el] = turn * -1 && emptyCheck[el] === 0) {
+                    if (checkOppCells[el] = turn * -1 && emptyCheck[el] === 0 && emptyCheck[el] !== undefined) {
                         mandatoryJumps.push(emptyCheckIds[el])
                     }
                 })
@@ -131,7 +134,7 @@ define([
         }
         // function must return an array of indexes requiring a jump
         return mandatoryJumps
-  
+
     }
 
     // function to convert board array into array of relevant string ids
@@ -147,4 +150,15 @@ define([
     }
     console.log(boardArrIntoIds(board))
 
+});
+
+define(function () {
+
+    return {
+        // add here what to export
+        board,
+        clickListen,
+        turn,
+        cells
+    }
 });

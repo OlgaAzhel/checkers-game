@@ -1,32 +1,18 @@
-// exports business
 
-const myFunction = function(bla){
-    console.log('kings function', bla)
-    return 'return value plus bla: ' + bla
-} 
 
-const myVar = 'this is myVar'
-///////////////////////////////////////////////////////////////////////////////////////////////
 let board = [
     [0, 1, 0, 1, 0, 1, 0, 1],
     [1, 0, 1, 0, 1, 0, 1, 0],
     [0, 1, 0, 1, 0, 1, 0, 1],
     [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 1, 0, 2, 0, 1],
-    [-1,0,-1, 0,-2, 0,-1, 0],
-    [0,-1, 0, 0, 0, -1, 0,-1],
-    [-1,0,-1, 0,-1, 0, 0, 0]
+    [0, 0, 0, 1, 0, 0, 0, 1],
+    [-1, 0, -1, 0, -2, 0, -1, 0],
+    [0, -1, 0, -1, 0, -1, 0, -1],
+    [-1, 0, -1, 0, -1, 0, -1, 0]
 ]
 
-let player1 = {
-    color: 'blue'
-}
-
-player1 = {
-    color: 'yellow'
-}
-
 let turn = -1
+
 // need for guard option -  an array of cells divs only
 let cells = [...document.querySelectorAll('#board > div')]
 // This event listener should be set up on array of els returned from  findActivPieces()
@@ -38,17 +24,18 @@ function allowedMovesKing(evt) {
     // calculate active cells for the picked King piece
     // Guard
     if (cells.indexOf(evt.target) === -1 || evt.target.getAttribute('id') === 'board') return
-    console.log("Its a KING")
+    
     // Extracting nesessary indexes from element's html id attribute
-
     let currentElId = evt.target.getAttribute('id')
     // Since all ids are string of format rXcY having length = 4, we can access their X for row and Y for col
     let curRowIdx = parseInt(currentElId[1])
     let curColIdx = parseInt(currentElId[3])
-    console.log(`This is King's current coordinates: r${curRowIdx}, c${curColIdx}`)
+    
     // if current board cell has value 2 or -2
     if (board[curRowIdx][curColIdx] === turn * 2) {
         let availableMoves = []
+        console.log("Its a KING")
+        console.log(`This is King's current coordinates: r${curRowIdx}, c${curColIdx}`)
         // for being open for the move cell must be empty, be on a next or pevious row and have column value +1 and -1 from current:
         //index of the next row in the board array:
         let checkRows = [[curRowIdx + turn],[curRowIdx - turn]]
@@ -70,7 +57,7 @@ function allowedMovesKing(evt) {
             }
         })
         // if any of check cells has value of opposite player call function to check for a mandatory jump
-        let mJumps = mandatoryJumps([currentElId])
+        let mJumps = mandatoryJumpsKing([currentElId])
         
         if (mJumps.length === 0) {
             console.log("YOU CHOOSE MOVE:", availableMoves)
@@ -91,7 +78,7 @@ function allowedMovesKing(evt) {
 }
 
 
-function mandatoryJumps(array) {
+function mandatoryJumpsKing(array) {
     // function have to check if any mandatory jumps must be made for CURRENT CHOSEN PIECE/PIECES if the beginning of move 
     // different behavior for regular and kings pieces
 
@@ -137,7 +124,7 @@ function mandatoryJumps(array) {
             //iterating throught array if indexes to check applying the indexes on "diag next cells" and "diag next+1 cells" checking both conditions to match. choosing cells to highlight for mandatory jump
             checkCellsIfEmpty.forEach((el) => {
             // if cell at current index in array next cells belongs to opponent and same index in next +1 array is empty - this is a mandatory jump
-                if (checkOppCells[el] = turn * -1 && emptyCheck[el] === 0) {
+                if (checkOppCells[el] = turn * -1 && emptyCheck[el] === 0 && emptyCheck[el] !== undefined) {
                     mandatoryJumps.push(emptyCheckIds[el])
                 }
             })
@@ -176,7 +163,7 @@ define(function() {
     return {
         // add here what to export
         allowedMovesKing,
-        myFunction,
-        exportedNameForMyVar: myVar
+        boardArrIntoIds,
+        mandatoryJumpsKing
     }
 });
