@@ -11,7 +11,7 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: center;    
+    align-items: center;
 }
 
 
@@ -19,7 +19,98 @@ body {
     display: grid;
     grid-template-columns: repeat(8, 10vmin);
     grid-template-rows: repeat(8, 10vmin);
-    border: 10px solid rgb(48,50,71);
-    background-color: rgb(255,252,231);
+    border: 10px solid rgb(48, 50, 71);
+    background-color: rgb(255, 252, 231);
 }
 
+div {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.yellow {
+    border: 1px solid rgba(0,0,0,0);
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-width: 9vmin;
+    min-height: 9vmin;
+    background: url(yellow.png);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+
+.yellow:hover, .yellowKing:hover {
+    box-shadow: 0.5vmin 0.5vmin rgba(48, 50, 71, 0.5);
+    align-self: flex-start;
+    padding-top: 0;
+}
+
+.yellowKing {
+    border: 1px solid rgba(0, 0, 0, 0);
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-width: 9vmin;
+    min-height: 9vmin;
+    background: url(yellowKing.png);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+
+.blue {
+    border: 1px solid rgba(48, 50, 71, 0);
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-width: 9vmin;
+    min-height: 9vmin;
+    background: url(blue.png);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+
+}
+
+.blue:hover, .blueKing:hover {
+    box-shadow: 0.5vmin 0.5vmin rgba(48, 50, 71, 0.5);
+    align-self: flex-start;
+    padding-top: 0;
+}
+
+.blueKing {
+    border: 1px solid rgba(48, 50, 71, 0);
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-width: 9vmin;
+    min-height: 9vmin;
+    background: url(blueKing.png);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+
+}
+
+.highlighted-cell {
+    border: 2px dashed rgb(255, 252, 231);
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-width: 9vmin;
+    min-height: 9vmin;
+}
