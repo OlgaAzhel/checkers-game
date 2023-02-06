@@ -1,6 +1,5 @@
 
 
-let turn = -1
 
 // need for guard option -  an array of cells divs only
 let cells = [...document.querySelectorAll('#board > div')]
@@ -9,13 +8,16 @@ document.getElementById('board').addEventListener('click', allowedMovesKing)
 
 
 function allowedMovesKing(evt) {
-    console.log(evt.target)
+
+    //since player actually click on span that represent piece, to access cell id we need access this span's parent
+    let cellCont = evt.target.parentNode
     // calculate active cells for the picked King piece
     // Guard
-    if (cells.indexOf(evt.target) === -1 || evt.target.getAttribute('id') === 'board') return
+    if (cells.indexOf(evt.target.parentNode) === -1 || evt.target.parentNode.getAttribute('id') === 'board') return
     
     // Extracting nesessary indexes from element's html id attribute
-    let currentElId = evt.target.getAttribute('id')
+    let currentElId = cellCont.getAttribute('id')
+    console.log(currentElId)
     // Since all ids are string of format rXcY having length = 4, we can access their X for row and Y for col
     let curRowIdx = parseInt(currentElId[1])
     let curColIdx = parseInt(currentElId[3])

@@ -1,10 +1,10 @@
 // render function must use cellState object and board array to update board view according to current game state
 
 const cellState = {
-    '1': { 'class': 'blue', 'html': "<span></span>" },
-    '-1': { 'class': 'yellow', 'html': "<span></span>" },
-    '2': { 'class': 'blueKing', 'html': "<span></span>" },
-    '-2': { 'class': 'yellowKing', 'html': "<span></span>" },
+    '1': { 'class': 'blue', 'html': "<span></span>", 'active': 'blueA' },
+    '-1': { 'class': 'yellow', 'html': "<span></span>", 'active': 'yellowA' },
+    '2': { 'class': 'blueKing', 'html': "<span></span>", 'active': 'blueA' },
+    '-2': { 'class': 'yellowKing', 'html': "<span></span>", 'active': 'yellowA' },
     'a': {'class': 'active'},
     's': {'class': 'sleeping'}
 }
@@ -12,14 +12,14 @@ const cellState = {
 let board = [
     [0, 1, 0, 1, 0, 1, 0, 1],
     [1, 0, 1, 0, 1, 0, 1, 0],
-    [0, 1, 0, 1, 0, 1, 0, 1],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 2, 0, 0, 0, 0],
-    [-1, 0, -1, 0, -2, 0, -1, 0],
-    [0, -1, 0, -1, 0, -1, 0, -1],
-    [-1, 0, -1, 0, -1, 0, -1, 0]
+    [0, 1, 0, 2, 0, 1, 0, 1],
+    [-1,0, 0, 0,-1, 0, 0, 0],
+    [0,-1, 0, 0, 0, 0, 0, 0],
+    [-1,0,-1, 0,-2, 0,-1, 0],
+    [0,-1, 0,-1, 0,-1, 0,-1],
+    [-1,0,-1, 0,-1, 0,-1, 0]
 ]
-
+ let turn = 1
 
 function render() {
     renderPieces()
@@ -28,7 +28,7 @@ function render() {
 }
 
 function renderPieces() {
-    
+    // iterating through board array to acces value and update the view accordingly
     board.map((rowArr, rowIdx) => {
         let currentId
         let r = `${rowIdx}`
@@ -40,11 +40,12 @@ function renderPieces() {
             let element = document.getElementById(currentId)
             // check value of it in board array
             let value = `${cell}`
-            console.log(value)
             // refer to cellState object to get class and inner HTML from it
             let newHTML = cellState[value]["html"]
             let newClass = cellState[value]["class"]
+            // adding piece element html 
             element.innerHTML = newHTML
+            // applying class 
             element.firstChild.classList.add(newClass)
         })
 
@@ -59,6 +60,8 @@ define(function () {
 
     return {
         // add here what to export
-       renderPieces
+       renderPieces,
+       cellState,
+       board
     }
 });

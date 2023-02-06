@@ -1,44 +1,11 @@
 define([
     'require',
     'kings', 
-    'render'
-], function (require, allowedMovesKing, mandatoryJumpsKing, boardArrIntoIds) {
+    'render', 
+    'active-pieces'
+], function (require, allowedMovesKing, mandatoryJumpsKing, boardArrIntoIds,renderPieces) {
     'use strict';
-        allowedMovesKing,
-        mandatoryJumpsKing,
-        boardArrIntoIds
 
-
-
-    const cellState = {
-        blue: 1,
-        yellow: -1,
-        blueKing: 2,
-        yellowKnig: -2,
-        active: 'a',
-        sleeping: 's'
-    }
-
-    // let board = [
-    //     [0, 1, 0, 1, 0, 1, 0, 1],
-    //     [1, 0, 1, 0, 1, 0, 1, 0],
-    //     [0, 1, 0, 1, 0, 1, 0, 1],
-    //     [0, 0, 0, 0, 0, 0, 0, 0],
-    //     [0, 0, 0, 1, 0, 0, 0, 0],
-    //     [-1, 0,-1, 0,-2,0,-1, 0],
-    //     [0, -1, 0,-1, 0,-1,0,-1],
-    //     [-1, 0,-1, 0,-1, 0,-1,0]
-    // ]
-
-    let player1 = {
-        color: 'blue'
-    }
-
-    player1 = {
-        color: 'yellow'
-    }
-
-    let turn = -1
 
 
     // need for guard option -  an array of cells divs only
@@ -48,13 +15,12 @@ define([
 
 
     function allowedMoves(evt) {
-        console.log(evt.target)
-        // calculate active cells for the picked piece
-
+        //since player actually click on span that represent piece, to access cell id we need access this span's parent
+        let cellCont = evt.target.parentNode
         // Guard - function must do nothing if not clicked on proper part of board
-        if (cells.indexOf(evt.target) === -1 || evt.target.getAttribute('id') === 'board') return
+        if (cells.indexOf(cellCont) === -1 || cellCont.getAttribute('id') === 'board') return
         // Accessing and extracting nesessary indexes from element's html id attribute
-        let currentElId = evt.target.getAttribute('id')
+        let currentElId = cellCont.getAttribute('id')
         // Since all ids are string of format rXcY having length = 4, we can access their X for row and Y for col
         let curRowIdx = parseInt(currentElId[1])
         let curColIdx = parseInt(currentElId[3])
@@ -160,6 +126,7 @@ define(function () {
         board,
         clickListen,
         turn,
-        cells
+        cells,
+        cellState
     }
 });

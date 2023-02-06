@@ -3,7 +3,7 @@
 //User click 'New Game' button:
 //function init() invoke, ask user to input their names into players' fields and click "Start game"
 // render() game using default game state variables and names inputs
-// run function to check if any mandatory jumps (mandatoryJump())(
+// run function to cells from mandatoryJump and pass it into active pieces function to highlight
 // render 'active pieces' (function findActivePieces())
 // add event listeners to them with renderBoard() as a callback
 //Player choose the piece (pieceEl)
