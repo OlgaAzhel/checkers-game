@@ -1,14 +1,10 @@
 define([
     'require',
-    'kings',
     'render',
     'active-pieces',
     'game'
 ], function (require, render) {
     'use strict';
-
-    console.log("HIGHLIGHT CELLS at regular NOW:", render, turn)
-
 
 
     // need for guard option -  an array of cells divs only
@@ -16,11 +12,14 @@ define([
     // This event listener should be set up on array of els returned from  findActivPieces()
     document.getElementById('board').addEventListener('click', allowedMoves)
 
+    let highlightCells = []
+    console.log("CURRENTLY HIGHLIGHTED CELLS :")
+
 
     function allowedMoves(evt) {
         let availableMoves = []
 
-        //since player actually click on span that represent piece, to access cell id we need access this span's parent
+        //since player actually click on span that represent a piece, to access cell id we need access this span's parent
         let cellCont = evt.target.parentNode
         // Prevent calling highlighter if player click on the same cell again and again. 
 
@@ -55,9 +54,8 @@ define([
                     availableMoves.push(checkCellsIds[idx])
                 }
             })
-        // if current board cell has value 2 or -2
+            // if current board cell has value 2 or -2
         } else if (board[curRowIdx][curColIdx] === turn * 2) {
-            let availableMoves = []
             console.log("Its a KING")
             console.log(`This is King's current coordinates: r${curRowIdx}, c${curColIdx}`)
             // for being open for the move cell must be empty, be on a next or pevious row and have column value +1 and -1 from current:
@@ -79,38 +77,23 @@ define([
                     availableMoves.push(checkCellsIds[idx])
                 }
             })
-            // checking for mandatory jumps for current cell...
-            let mJumps = mandatoryJumps([currentElId])
-            // highlighting available cells upon results:
-            if (mJumps.length === 0) {
-                console.log("CHOOSE YOUR MOVE:", availableMoves)
-                // updating highlighted cells array. Will need to remove highlight once another event occurs 
-                highlightCells = availableMoves
-                emptyCellHighlighter(availableMoves)
-                return availableMoves
-            } else {
-                console.log("YOU MUST JUMP:", mJumps)
-                highlightCells = availableMoves
-                emptyCellHighlighter(mJumps)
-                return mJumps
-            }
+        }
+        // checking for mandatory jumps for current cell...
+        let mJumps = mandatoryJumps([currentElId])
+        // highlighting available cells upon results:
+        if (mJumps.length === 0) {
+            console.log("CHOOSE YOUR MOVE:", availableMoves)
+            // updating highlighted cells array. Will need to remove highlight once another event occurs 
+            highlightCells = availableMoves
+            emptyCellHighlighter(availableMoves)
+            return availableMoves
+        } else {
+            console.log("YOU MUST JUMP:", mJumps)
+            highlightCells = mJumps
+            emptyCellHighlighter(mJumps)
+            return mJumps
+        }
 
-        //     let mJumps = mandatoryJumpsKing([currentElId])
-
-        //     if (mJumps.length === 0) {
-        //         console.log("YOU CHOOSE MOVE:", availableMoves)
-        //         highlightCells = availableMoves
-        //         emptyCellHighlighter(availableMoves)
-        //         return availableMoves
-        //     } else {
-        //         console.log("YOU MUST JUMP:", mJumps)
-        //         highlightCells = availableMoves
-        //         emptyCellHighlighter(mJumps)
-        //         return mJumps
-        //     }
-        // }
-        // if any of check cells has value of opposite player call function to check for a mandatory jump
-        // function returns and array of indexes available for moves or mandatory jumps if any
     }
 
     function emptyCellHighlighter(array) {
@@ -135,20 +118,19 @@ define([
     }
 
     function mandatoryJumps(array) {
-        console.log("mandatoryJumps run...")
+        console.log("mandatoryJumps run with argument...", array)
 
         // function have to check if any mandatory jumps must be made // accepting array of pieces to check. 
         // different behavior for regular and kings pieces
 
-        let mandatoryJumps = []
+        let mandatoryJumpsArr = []
         for (let i = 0; i < array.length; i++) {
             let curRowIdx = parseInt(array[i][1])
-            // console.log('this is current row:', curRowIdx)
             let curColIdx = parseInt(array[i][3])
-            // console.log('this is current col:', curColIdx)
-            // checking for type of piece
+
+            // if a regular piece
             if (board[curRowIdx][curColIdx] === turn) {
-                console.log("this is regular piece's JUMP", array[i])
+                console.log("checking for regular piece's JUMP", array[i])
                 //check if any diagonal cells next to current occupied by another player, and if diagonal cells next to them are empty
                 let checkRow = curRowIdx + turn
                 let checkRowIfEmpty = curRowIdx + (2 * turn)
@@ -170,30 +152,72 @@ define([
                 //choosing cells to highlight for mandatory jump
                 checkCellsIfEmpty.forEach((el) => {
                     if (checkOppCells[el] = turn * -1 && emptyCheck[el] === 0 && emptyCheck[el] !== undefined) {
-                        mandatoryJumps.push(emptyCheckIds[el])
+                        mandatoryJumpsArr.push(emptyCheckIds[el])
+                    }
+                })
+                // if King
+            } else if (board[curRowIdx][curColIdx] === turn * 2) {
+                //check if any diagonal cells next to current occupied by another player, and if diagonal cells next to them are empty
+                let checkRows = [[curRowIdx + turn], [curRowIdx - turn]]
+                let checkRowsIfEmpty = [[curRowIdx + (2 * turn)], [curRowIdx - (2 * turn)]]
+                let checkOppCells = []
+                let checkOppIds = []
+                checkRows.map((el) => {
+                    checkOppCells.push(board[el][curColIdx + 1])
+                    checkOppIds.push(`r${el}c${curColIdx + 1}`)
+                    checkOppCells.push(board[el][curColIdx - 1])
+                    checkOppIds.push(`r${el}c${curColIdx - 1}`)
+                })
+
+                // Check for emptyness only direction/-s with cells that have value of opposit player
+                // create array with indexes to check. Will apply these indexes on OP's cells and relevant empty on same index - same direction
+                let checkCellsIfEmpty = []
+                checkOppCells.forEach((el, idx) => {
+                    //check array checkOppCells (4 diagonal cells next to current piece). Check them for opponent's pieces and write down thir indexes into checkCellsIfEmpty array.
+                    if (el === turn * -1 || el === turn * -2) {
+                        checkCellsIfEmpty.push(idx)
+                    }
+                })
+                console.log(checkCellsIfEmpty)
+                //create arrays of 4 diagonall cells next + 1 to current piece that need to be empty in order to JUMP. One has to be with values and another with indexes 
+                let emptyCheck = []
+                let emptyCheckIds = []
+                checkRowsIfEmpty.map((el) => {
+                    emptyCheck.push(board[el][curColIdx + 2])
+                    emptyCheck.push(board[el][curColIdx - 2])
+                    emptyCheckIds.push(`r${el}c${curColIdx + 2}`)
+                    emptyCheckIds.push(`r${el}c${curColIdx - 2}`)
+                })
+
+                console.log("these are cells to be empty for jump", emptyCheck, emptyCheckIds)
+                //iterating throught array if indexes to check applying the indexes on "diag next cells" and "diag next+1 cells" checking both conditions to match. choosing cells to highlight for mandatory jump
+                checkCellsIfEmpty.forEach((el) => {
+                    // if cell at current index in array next cells belongs to opponent and same index in next +1 array is empty - this is a mandatory jump
+                    if (checkOppCells[el] = turn * -1 && emptyCheck[el] === 0 && emptyCheck[el] !== undefined) {
+                        mandatoryJumpsArr.push(emptyCheckIds[el])
+
                     }
                 })
             }
 
         }
+        console.log("mandatory jumps return", mandatoryJumpsArr)
         // function must return an array of indexes requiring a jump
-        return mandatoryJumps
+        return mandatoryJumpsArr
 
     }
 
 
-});
+})
+
 
 define(function () {
 
     return {
         // add here what to export
         board,
-        turn: turn,
         cells,
-        cellState,
-        emptyCellHighlighter,
-        emptyCellHighlightRemove,
-        highlightCells: highlightCells,
+
+
     }
 });

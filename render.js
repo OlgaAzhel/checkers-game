@@ -16,13 +16,12 @@ let board = [
     [-1,0, 0, 0,-1, 0, 0, 0],
     [0,-1, 0, 0, 0, 0, 0, 0],
     [-1,0,-1, 0,-2, 0,-1, 0],
-    [0,-1, 0,-1, 0,-1, 0,-1],
+    [0,-1, 0, 0, 0,-1, 0,-1],
     [-1,0,-1, 0,-1, 0,-1, 0]
 ]
-let turn = 1
+let turn = -1
 
 
-let highlightCells = []
 
 function render() {
     renderPieces()
@@ -68,6 +67,6 @@ define(function () {
        cellState,
        board,
        turn,
-        highlightCells
+
     }
 });
