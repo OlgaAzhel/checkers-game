@@ -2,25 +2,39 @@ define([
     'require',
     'kings', 
     'render', 
-    'active-pieces'
-], function (require, allowedMovesKing, mandatoryJumpsKing, boardArrIntoIds,renderPieces) {
+    'active-pieces',
+    'game'
+], function (require, render) {
     'use strict';
+
+    console.log("HIGHLIGHT CELLS at regular NOW:", render, turn)
 
 
 
     // need for guard option -  an array of cells divs only
     let cells = [...document.querySelectorAll('#board > div')]
     // This event listener should be set up on array of els returned from  findActivPieces()
-    let clickListen = document.getElementById('board').addEventListener('click', allowedMoves)
+    document.getElementById('board').addEventListener('click', allowedMoves)
 
 
     function allowedMoves(evt) {
+        console.log("highlighted cells now:", highlightCells)
         //since player actually click on span that represent piece, to access cell id we need access this span's parent
         let cellCont = evt.target.parentNode
+        // Prevent calling highlighter if player click on the same cell again and again. 
+
+        
+        console.log("allowedMoves run...")
         // Guard - function must do nothing if not clicked on proper part of board
         if (cells.indexOf(cellCont) === -1 || cellCont.getAttribute('id') === 'board') return
         // Accessing and extracting nesessary indexes from element's html id attribute
         let currentElId = cellCont.getAttribute('id')
+
+        if (highlightCells.length > 0) {
+            emptyCellHighlightRemove(highlightCells)
+        }
+        
+        console.log("chosen cell new", highlightCells)
         // Since all ids are string of format rXcY having length = 4, we can access their X for row and Y for col
         let curRowIdx = parseInt(currentElId[1])
         let curColIdx = parseInt(currentElId[3])
@@ -44,12 +58,17 @@ define([
                 }
             })
             // if any of check cells has value of opposite player call function to check for a mandatory jump
+            
             let mJumps = mandatoryJumps([currentElId])
             if (mJumps.length === 0) {
                 console.log("YOU CHOOSE MOVE:", availableMoves)
+                highlightCells = availableMoves
+                emptyCellHighlighter(availableMoves)
                 return availableMoves
             } else {
                 console.log("YOU MUST JUMP:", mJumps)
+                highlightCells = availableMoves
+                emptyCellHighlighter(mJumps)
                 return mJumps
             }
 
@@ -58,8 +77,30 @@ define([
         // function returns and array of indexes available for moves or mandatory jumps if any
     }
 
+    function emptyCellHighlighter(array) {
+        array.forEach((elId) => {
+            let addClass = cellState[0].active
+            let highlightEl = document.getElementById(elId)
+            let dashedCircle = document.createElement('span')
+            dashedCircle.classList.add(addClass)
+            highlightEl.appendChild(dashedCircle)
+        })
+
+    }
+    function emptyCellHighlightRemove(array) {
+        console.log("emptyCellHiglightRemove run ...", array)
+        array.map((cell) => {
+            console.log('removing highlighting:', cell)
+            let currentActiveCell = document.getElementById(cell)
+            console.log(currentActiveCell.childNodes[0])
+            currentActiveCell.innerHTML =''
+
+        })
+    }
 
     function mandatoryJumps(array) {
+        console.log("mandatoryJumps run...")
+
         // function have to check if any mandatory jumps must be made // accepting array of pieces to check. 
         // different behavior for regular and kings pieces
 
@@ -104,18 +145,6 @@ define([
 
     }
 
-    // function to convert board array into array of relevant string ids
-    function boardArrIntoIds(arr) {
-        let idBoard = []
-        board.map((el, i) => {
-            el.map((cell, colIndex) => {
-                idBoard.push(`r${i}c${colIndex}`)
-            })
-        })
-
-        return idBoard
-    }
-    console.log(boardArrIntoIds(board))
 
 });
 
@@ -124,9 +153,11 @@ define(function () {
     return {
         // add here what to export
         board,
-        clickListen,
-        turn,
+        turn:turn,
         cells,
-        cellState
+        cellState, 
+        emptyCellHighlighter,
+        emptyCellHighlightRemove,
+        highlightCells: highlightCells,
     }
 });

@@ -1,11 +1,11 @@
 // render function must use cellState object and board array to update board view according to current game state
 
 const cellState = {
-    '1': { 'class': 'blue', 'html': "<span></span>", 'active': 'blueA' },
-    '-1': { 'class': 'yellow', 'html': "<span></span>", 'active': 'yellowA' },
-    '2': { 'class': 'blueKing', 'html': "<span></span>", 'active': 'blueA' },
-    '-2': { 'class': 'yellowKing', 'html': "<span></span>", 'active': 'yellowA' },
-    'a': {'class': 'active'},
+    '1': { 'class': 'blue', 'html': "<span></span>", 'activePiece': 'blueA' },
+    '-1': { 'class': 'yellow', 'html': "<span></span>", 'activePiece': 'yellowA' },
+    '2': { 'class': 'blueKing', 'html': "<span></span>", 'activePiece': 'blueA' },
+    '-2': { 'class': 'yellowKing', 'html': "<span></span>", 'activePiece': 'yellowA' },
+    '0': { 'active': 'emptyCellA'},
     's': {'class': 'sleeping'}
 }
 
@@ -19,7 +19,10 @@ let board = [
     [0,-1, 0,-1, 0,-1, 0,-1],
     [-1,0,-1, 0,-1, 0,-1, 0]
 ]
- let turn = 1
+let turn = 1
+
+
+let highlightCells = []
 
 function render() {
     renderPieces()
@@ -28,6 +31,7 @@ function render() {
 }
 
 function renderPieces() {
+
     // iterating through board array to acces value and update the view accordingly
     board.map((rowArr, rowIdx) => {
         let currentId
@@ -62,6 +66,8 @@ define(function () {
         // add here what to export
        renderPieces,
        cellState,
-       board
+       board,
+       turn,
+        highlightCells
     }
 });
