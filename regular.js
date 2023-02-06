@@ -1,7 +1,7 @@
 define([
     'require',
-    'kings', 
-    'render', 
+    'kings',
+    'render',
     'active-pieces',
     'game'
 ], function (require, render) {
@@ -18,35 +18,33 @@ define([
 
 
     function allowedMoves(evt) {
-        console.log("highlighted cells now:", highlightCells)
+        let availableMoves = []
+
         //since player actually click on span that represent piece, to access cell id we need access this span's parent
         let cellCont = evt.target.parentNode
         // Prevent calling highlighter if player click on the same cell again and again. 
 
-        
         console.log("allowedMoves run...")
         // Guard - function must do nothing if not clicked on proper part of board
         if (cells.indexOf(cellCont) === -1 || cellCont.getAttribute('id') === 'board') return
-        // Accessing and extracting nesessary indexes from element's html id attribute
-        let currentElId = cellCont.getAttribute('id')
 
+        // Removing previous highlighting if player changes his mind and choses different piece. Highlight cells array in this case already have elements (id)
         if (highlightCells.length > 0) {
             emptyCellHighlightRemove(highlightCells)
         }
-        
-        console.log("chosen cell new", highlightCells)
+        // Accessing and extracting nesessary indexes from chosen piece html id attribute
+        let currentElId = cellCont.getAttribute('id')
         // Since all ids are string of format rXcY having length = 4, we can access their X for row and Y for col
         let curRowIdx = parseInt(currentElId[1])
         let curColIdx = parseInt(currentElId[3])
         console.log(`This is chosen piece current coordinates: r${curRowIdx}, c${curColIdx}`)
+        // Next logic depend on type of piece...
         // if current board cell has value 1 or -1
         if (board[curRowIdx][curColIdx] === turn) {
-            let availableMoves = []
             console.log("Its a regular piece")
             // for being open for the move cells must be empty, be on the next row and have columns values + 1 and -1 from current:
             //index of the next row in the board array:
             let checkRow = curRowIdx + turn
-
             // creating an array of two possible for move cells to check 
             let checkCellsVals = [board[checkRow][curColIdx + 1], board[checkRow][curColIdx - 1]]
             // saving these cells' ids
@@ -57,11 +55,36 @@ define([
                     availableMoves.push(checkCellsIds[idx])
                 }
             })
-            // if any of check cells has value of opposite player call function to check for a mandatory jump
-            
+        // if current board cell has value 2 or -2
+        } else if (board[curRowIdx][curColIdx] === turn * 2) {
+            let availableMoves = []
+            console.log("Its a KING")
+            console.log(`This is King's current coordinates: r${curRowIdx}, c${curColIdx}`)
+            // for being open for the move cell must be empty, be on a next or pevious row and have column value +1 and -1 from current:
+            //index of the next row in the board array:
+            let checkRows = [[curRowIdx + turn], [curRowIdx - turn]]
+            // creating an array of two possible for move cells to check 
+            let checkCellsVals = []
+            // saving these cells' ids
+            let checkCellsIds = []
+            checkRows.map((el) => {
+                checkCellsVals.push(board[el][curColIdx + 1])
+                checkCellsIds.push(`r${el}c${curColIdx + 1}`)
+                checkCellsVals.push(board[el][curColIdx - 1])
+                checkCellsIds.push(`r${el}c${curColIdx - 1}`)
+            })
+            // filtering the array to find a cell that has a value 0 and pushing into available moves
+            checkCellsVals.map((cell, idx) => {
+                if (cell === 0) {
+                    availableMoves.push(checkCellsIds[idx])
+                }
+            })
+            // checking for mandatory jumps for current cell...
             let mJumps = mandatoryJumps([currentElId])
+            // highlighting available cells upon results:
             if (mJumps.length === 0) {
-                console.log("YOU CHOOSE MOVE:", availableMoves)
+                console.log("CHOOSE YOUR MOVE:", availableMoves)
+                // updating highlighted cells array. Will need to remove highlight once another event occurs 
                 highlightCells = availableMoves
                 emptyCellHighlighter(availableMoves)
                 return availableMoves
@@ -72,8 +95,21 @@ define([
                 return mJumps
             }
 
+        //     let mJumps = mandatoryJumpsKing([currentElId])
 
-        }
+        //     if (mJumps.length === 0) {
+        //         console.log("YOU CHOOSE MOVE:", availableMoves)
+        //         highlightCells = availableMoves
+        //         emptyCellHighlighter(availableMoves)
+        //         return availableMoves
+        //     } else {
+        //         console.log("YOU MUST JUMP:", mJumps)
+        //         highlightCells = availableMoves
+        //         emptyCellHighlighter(mJumps)
+        //         return mJumps
+        //     }
+        // }
+        // if any of check cells has value of opposite player call function to check for a mandatory jump
         // function returns and array of indexes available for moves or mandatory jumps if any
     }
 
@@ -93,7 +129,7 @@ define([
             console.log('removing highlighting:', cell)
             let currentActiveCell = document.getElementById(cell)
             console.log(currentActiveCell.childNodes[0])
-            currentActiveCell.innerHTML =''
+            currentActiveCell.innerHTML = ''
 
         })
     }
@@ -153,9 +189,9 @@ define(function () {
     return {
         // add here what to export
         board,
-        turn:turn,
+        turn: turn,
         cells,
-        cellState, 
+        cellState,
         emptyCellHighlighter,
         emptyCellHighlightRemove,
         highlightCells: highlightCells,

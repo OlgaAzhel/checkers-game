@@ -25,9 +25,7 @@ define([
         // calculate active cells for the picked King piece
         // Guard
         if (cells.indexOf(evt.target.parentNode) === -1 || evt.target.parentNode.getAttribute('id') === 'board') return
-        cells.map((cell) => {
-            cell.classList.remove('active')
-        })
+
         // Extracting nesessary indexes from element's html id attribute
         let currentElId = cellCont.getAttribute('id')
         console.log(currentElId)
