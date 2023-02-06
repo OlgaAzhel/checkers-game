@@ -12,8 +12,8 @@ requirejs.config({
 });
 
 // Start the main app logic.
-requirejs(['regular'],
-    function (regular) {
+requirejs(['move'],
+    function (move) {
         //jQuery, canvas and the app/sub module are all
         //loaded and can be used here now.
     });
