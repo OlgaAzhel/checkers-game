@@ -39,6 +39,35 @@ define([
     let currentMoveActivePieces = []
     /////////////////// Functions ////////////////////
 
+
+    //start of the game
+    function init() {
+        render()
+        // looking for mandatory moves on the board
+        let checkBoard = boardToIDarray(board)
+        mandatoryJumps(checkBoard)
+
+        // if mustJumpPieces.length > 0 - highlight those cells
+        if (mustJumpPieces.length > 0) {
+            highlightPieces(mustJumpPieces)
+        } else {
+            highlightPieces() //add event listeners to active pieces
+        }
+        // Player clicks on a piece calling event allowedMoves event listener 
+
+        
+
+    }
+
+    init()
+
+    function processMove(evt) {
+        console.log("PROCESSING A NEW MOVE", currentMoveActivePieces)
+        // remove event listeners and highlight from currentMoveActivePieces
+        // remove event listeners from current highlightCells
+        // 
+    }
+
     function render() {
         renderPieces()
 
@@ -71,7 +100,7 @@ define([
         })
     }
 
-    render()
+
 
 
     console.log(turn)
@@ -170,26 +199,7 @@ define([
     }
  
 
-    
-    //main logic control of the game
-    function handleMove(evt) {
-        // looking for mandatory moves on the board
-        let checkBoard = boardToIDarray(board)
-        mandatoryJumps(checkBoard)
 
-        // if mustJumpPieces.length > 0 - highlight those cells
-        if (mustJumpPieces.length > 0) {
-            highlightPieces(mustJumpPieces)
-        } else {
-            highlightPieces() //add event listeners to active pieces
-        }  
-    // Player clicks on a piece calling event allowedMoves event listener 
- 
-    }
-
-    function processMove() {
-        console.log("PROCESSING A NEW MOVE")
-    }
 
 
     function boardToIDarray(array) {
@@ -206,7 +216,7 @@ define([
         return idArray
 
     }
-    handleMove()
+ 
  
 
 
