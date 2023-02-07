@@ -1,6 +1,4 @@
 define([
-    'require',
-    'render',
     'game'
 ], function (require, render) {
     'use strict';
@@ -20,7 +18,7 @@ define([
         [1, 0, 0, 0, 0, 0, 1, 0],
         [0, 1, 0, 2, 0, 1, 0, 1],
         [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, -1, 0, 0, 0, 0, 0, -1],
+        [0, -1, 0, 1, 0, 0, 0, -1],
         [-1, 0, -1, 0, -2, 0, -1, 0],
         [0, -1, 0, 0, 0, -1, 0, -1],
         [-1, 0, -1, 0, -1, 0, -1, 0]
@@ -37,9 +35,12 @@ define([
     let highlightCells = [] // cells that should be highlighted
     let mustJumpPieces = [] // pieces that must jump
     let currentMoveActivePieces = []
+    let chosenPiece = ''
+    let chosenCell = ''
     /////////////////// Functions ////////////////////
 
 
+    init()
     //start of the game
     function init() {
         render()
@@ -53,20 +54,42 @@ define([
         } else {
             highlightPieces() //add event listeners to active pieces
         }
-        // Player clicks on a piece calling event allowedMoves event listener 
-
-        
-
+        // Player clicks on a piece calling event allowedMoves event listener   
+        // ------>
     }
 
-    init()
 
     function processMove(evt) {
-        console.log("PROCESSING A NEW MOVE", currentMoveActivePieces)
-        // remove event listeners and highlight from currentMoveActivePieces
-        // remove event listeners from current highlightCells
-        // 
+
+        chosenCell = evt.target.parentNode.getAttribute('id')
+
+        console.log("PROCESSING A NEW MOVE",
+            "current active ALL:", currentMoveActivePieces,
+            "actingPiece:", chosenPiece,
+            "highlighted cells:", highlightCells
+        )
+
+        // removing highlights and event listeners from currentMoveActivePieces
+        pieceHighlightRemove(currentMoveActivePieces)
+        // reset array af highlighted pieces
+        currentMoveActivePieces = []
+        // remove event listeners highlited empty cells
+        emptyCellHighlightRemove(highlightCells)
+        highlightCells = []
+
     }
+
+    // function processMove(cellFrom, cellTo) {
+    //     console.log("updating board after Move")
+    // }
+
+
+    // function processJump(cellFrom, cellTo) {
+    //     console.log("updating board after JUMP")
+
+    // }
+
+
 
     function render() {
         renderPieces()
@@ -112,6 +135,7 @@ define([
         // if mandatiryJumps returns array with length more than 0, this function should return the same array as result
         if (mjArray) {
             console.log("there is mandatory Jump:")
+            currentMoveActivePieces = mjArray
             mjArray.forEach((id) => {
                 let span = document.getElementById(id)
                 console.log(span)
@@ -179,12 +203,7 @@ define([
             })
         })
         pieceHighlighter(activePieces)
-        // adding event listeners to activePieces
-        activePieces.forEach((id) => {
-            let span = document.getElementById(id)
-            console.log(span)
-            span.addEventListener('click', allowedMoves)
-        })
+        // highlight active pieces and add event listeners to activePieces
         currentMoveActivePieces = activePieces
         return activePieces
 
@@ -195,9 +214,16 @@ define([
             let addId = cellState[turn].activePiece
             let highlightEl = document.getElementById(elId).childNodes[0]
             highlightEl.setAttribute('id', addId)
+            highlightEl.addEventListener('click', allowedMoves)
         })
     }
- 
+    function pieceHighlightRemove(arr) {
+        arr.forEach((elId) => {
+            let span = document.getElementById(elId).childNodes[0]
+            span.removeAttribute('id')
+            span.removeEventListener('click', allowedMoves)
+        })
+    }
 
 
 
@@ -289,23 +315,25 @@ define([
         if (mJumps.length === 0) {
             console.log("CHOOSE YOUR MOVE:", availableMoves)
             // updating highlighted cells array. Will need to remove highlight once another event occurs 
+            
             highlightCells = availableMoves
-            emptyCellHighlighter(availableMoves)
-            availableMoves.forEach((id) => {
-                let span = document.getElementById(id)
-                console.log(span)
-                span.addEventListener('click', processMove)
+            chosenPiece = currentElId
+            availableMoves.forEach((elId) => {
+                let currentActiveCell = document.getElementById(elId)
+                
+                currentActiveCell.addEventListener('click', processMove)
             })
-
+            emptyCellHighlighter(availableMoves)
             return availableMoves
         } else {
             console.log("YOU MUST JUMP:", mJumps)
             highlightCells = mJumps
+            chosenPiece = currentElId
             emptyCellHighlighter(mJumps)
-            availableMoves.forEach((id) => {
-                let span = document.getElementById(id)
-                console.log(span)
-                span.addEventListener('click', processMove)
+            mJumps.forEach((elId) => {
+                let currentActiveCell = document.getElementById(elId)
+                console.log(chosenPiece)
+                currentActiveCell.addEventListener('click', processMove)
             })
             return mJumps
         }
@@ -318,10 +346,11 @@ define([
     function emptyCellHighlighter(array) {
         array.forEach((elId) => {
             let addClass = cellState[0].active
-            let highlightEl = document.getElementById(elId)
+            let currentActiveCell = document.getElementById(elId)
             let dashedCircle = document.createElement('span')
             dashedCircle.classList.add(addClass)
-            highlightEl.appendChild(dashedCircle)
+            currentActiveCell.appendChild(dashedCircle)
+
         })
 
     }
@@ -330,8 +359,10 @@ define([
         array.map((cell) => {
             console.log('removing highlighting:', cell)
             let currentActiveCell = document.getElementById(cell)
-            console.log(currentActiveCell.childNodes[0])
+            console.log(currentActiveCell)
             currentActiveCell.innerHTML = ''
+            // currentActiveCell.removeEventListener('click', processMove)
+            // currentActiveCell.removeEventListener('click', processJump)
 
         })
     }
