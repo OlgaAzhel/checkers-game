@@ -90,8 +90,9 @@ define([
                 currentMoveActivePieces = []
                 turn = turn * -1
                 init()
+            } else {
+                highlightPieces(mustJumpPieces)
             }
-            
 
         } else {
             // looking for mandatory moves on the board
@@ -107,11 +108,6 @@ define([
             }
         }
 
-        // if mustJumpPieces.length > 0 - highlight those cells
-
-        
-        // Player clicks on a piece calling event allowedMoves event listener   
-        // ------>
     }
 
 
@@ -197,14 +193,15 @@ define([
             if (board[newRow][newCol] === turn && ((turn === -1 && board[newRow] === 0) || (turn === 1 && board[newRow] === 7))) {
                 board[newRow][newCol] = turn * 2
                 board[currentRow][currentCol] = 0
-
+                init()
             } else {
                 board[newRow][newCol] = currentValue
                 board[currentRow][currentCol] = 0
                 mightHavToJumpPieces.push(cellTo)
-
+                console.log("CHECK IF THIS PIECE HAVE TO JUMP AGAIN:", cellTo, mightHavToJumpPieces)
+                init()
             }
-            init()
+            
 
         
 
