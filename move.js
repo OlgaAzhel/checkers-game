@@ -68,6 +68,7 @@ define([
 
     let highlightCells = [] // cells that should be highlighted
     let mustJumpPieces = [] // pieces that must jump
+    let mightHavToJumpPieces = []
     let currentMoveActivePieces = []
     let chosenPiece = ''
     let chosenCell = ''
@@ -79,17 +80,35 @@ define([
     function init() {
         console.log("CURRENT TURN", turn)
         renderPieces()
-        // looking for mandatory moves on the board
-        let checkBoard = boardToIDarray(board)
-        mandatoryJumps(checkBoard)
-        // if mustJumpPieces.length > 0 - highlight those cells
-        if (mustJumpPieces.length > 0) {
-            highlightPieces(mustJumpPieces)
+        if (mightHavToJumpPieces.length > 0) {
+            // if any pieces left to continue jump
+            console.log("CONTINUE JUMP SITUATION....")
+            let checkIfJumpAgain = mandatoryJumps(mightHavToJumpPieces)
+
+            if (checkIfJumpAgain.length === 0) {
+                mightHavToJumpPieces = []
+                currentMoveActivePieces = []
+                turn = turn * -1
+                init()
+            }
             
+
         } else {
-            highlightPieces() 
-            //and add event listeners to active pieces
+            // looking for mandatory moves on the board
+            let checkBoard = boardToIDarray(board)
+            console.log("NEW MOVE SITUATION....")
+            mandatoryJumps(checkBoard)
+            if (mustJumpPieces.length > 0) {
+                highlightPieces(mustJumpPieces)
+
+            } else {
+                highlightPieces()
+                //and add event listeners to active pieces
+            }
         }
+
+        // if mustJumpPieces.length > 0 - highlight those cells
+
         
         // Player clicks on a piece calling event allowedMoves event listener   
         // ------>
@@ -182,9 +201,9 @@ define([
             } else {
                 board[newRow][newCol] = currentValue
                 board[currentRow][currentCol] = 0
+                mightHavToJumpPieces.push(cellTo)
+
             }
-            turn = turn * -1
-            console.log('Switching TURN to:', turn)
             init()
 
         
