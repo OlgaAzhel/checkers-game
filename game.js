@@ -33,17 +33,3 @@
 //     handleMove()
 
 
-
-
-
-
-
-// })
-
-// define(function () {
-
-//     return {
-//         // add here what to export
-//         handleMove
-//     }
-// });

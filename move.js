@@ -49,15 +49,15 @@ define([
 
     let board = [
         [0, 1, 0, 1, 0, 1, 0, 1],
-        [1, 0, 0, 0, 0, 0, 1, 0],
+        [1, 0, 0, 0, 0, 0, 0, 0],
         [0, 1, 0, 2, 0, 1, 0, 1],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, -1, 0, 1, 0, 0, 0, -1],
-        [-1, 0, -1, 0, -2, 0, -1, 0],
+        [0, 0, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, -1],
+        [0, 0, -1, 0, -2, 0, -1, 0],
         [0, -1, 0, 0, 0, -1, 0, -1],
         [-1, 0, -1, 0, -1, 0, -1, 0]
     ]
-    let turn = 1
+    let turn = -1
 
     // need for guard option -  an array of cells divs only
     let cells = [...document.querySelectorAll('#board > div')]
@@ -89,7 +89,6 @@ define([
         } else {
             highlightPieces() 
             //and add event listeners to active pieces
-            
         }
         
         // Player clicks on a piece calling event allowedMoves event listener   
@@ -117,43 +116,82 @@ define([
         emptyCellHighlightRemove(highlightCells)
         highlightCells = []
 
-        console.log(chosenPiece, chosenCell)
+        console.log(" NEED TO UPDATE BOARD:", chosenPiece, chosenCell)
         boardUpdate(chosenPiece, chosenCell)
-
+        // if no more mandatory jumps - change turn 
+        
     }
 
     function boardUpdate(cellFrom, cellTo) {
         console.log("boardUpdate run...")
         let currentRow = parseInt(cellFrom[1])
         let newRow = parseInt(cellTo[1])
+        if (currentRow + 1 === newRow || currentRow - 1 === newRow){
+            moveOnBoard(cellFrom, cellTo)
+        } else if (currentRow + 2 === newRow || currentRow - 2 === newRow) {
+            jumpOnBoard(cellFrom, cellTo)
+        }
+            
+       
+            console.log("Its a King board update...")
+        }
+
+
+        function moveOnBoard(cellFrom, cellTo) {
+
+            console.log("Updating BOARD after regular move..", cellFrom, cellTo)
+            let currentRow = parseInt(cellFrom[1])
+            let newRow = parseInt(cellTo[1])
+            let currentCol = parseInt(cellFrom[3])
+            let newCol = parseInt(cellTo[3])
+
+            currentMoveActivePieces = []
+            //If piece reaches last row as a result of the move it turns into a king:
+            if (board[newRow][newCol] === turn && ((turn === -1 && board[newRow] === 0) || (turn === 1 && board[newRow] === 7)) )  {
+                board[newRow][newCol] = turn*2
+                
+            } 
+            board[currentRow][currentCol] = 0
+            board[newRow][newCol] = turn
+        
+            turn = turn * -1
+            console.log('Switching TURN to:', turn)
+            init()
+    
+
+            
+        }    
+
+        function jumpOnBoard(cellFrom, cellTo) {
+            console.log("Updating BOARD after jump move..", cellFrom, cellTo)
+        let currentRow = parseInt(cellFrom[1])
+        let newRow = parseInt(cellTo[1])
         let currentCol = parseInt(cellFrom[3])
         let newCol = parseInt(cellTo[3])
         let currentValue = board[currentRow][currentCol]
-        if (currentRow + turn === newRow) {
-            // It is a regular move
-            console.log("Regular board update run")
-            board[currentRow][currentCol] = 0
-            board[newRow][newCol] = currentValue
+        console.log("THIS IS CURRENT VALUE:", currentValue)
 
-        } else if (currentRow + turn * 2 === newRow) {
-            // Its a jump
-            console.log("Jump board update run")
-            let oppCol = (newCol - currentCol) / 2 + currentCol
-            let oppRow = (newRow - currentRow) / 2 + currentRow
-            board[currentRow][currentCol] = 0
-            board[oppRow][oppCol] = 0
-            board[newRow][newCol] = currentValue
+            let opCol = (newCol - currentCol) / 2 + currentCol
+            let opRow = (newRow - currentRow) / 2 + currentRow
+            board[opRow][opCol] = 0;
+            //If piece reaches last row as a result of the jump it turns into a king:
+            if (board[newRow][newCol] === turn && ((turn === -1 && board[newRow] === 0) || (turn === 1 && board[newRow] === 7))) {
+                board[newRow][newCol] = turn * 2
+                board[currentRow][currentCol] = 0
 
-        }
+            } else {
+                board[newRow][newCol] = currentValue
+                board[currentRow][currentCol] = 0
+            }
+            turn = turn * -1
+            console.log('Switching TURN to:', turn)
+            init()
+
         
-        renderPieces()
-        console.log(currentValue, board)
-        highlightCells = [] // cells that should be highlighted
-        mustJumpPieces = [] // pieces that must jump
-        currentMoveActivePieces = []
-        chosenPiece = ''
-        chosenCell = ''
-        init()
+
+
+
+
     }
 
 
@@ -168,11 +206,10 @@ define([
         // if mandatiryJumps returns array with length more than 0, this function should return the same array as result
         if (mjArray) {
             console.log("there is mandatory Jump:", mjArray)
-            currentMoveActivePieces = mjArray
             mjArray.forEach((id) => {
-                let span = document.getElementById(id).childNodes[0]
-                console.log(span)
-                span.addEventListener('click', allowedMoves)
+                let div = document.getElementById(id)
+                console.log(div)
+                div.addEventListener('click', allowedMoves)
             })
             pieceHighlighter(mjArray)
             return
@@ -236,7 +273,6 @@ define([
                     }
                 })
             })
-            currentMoveActivePieces = activePieces
             pieceHighlighter(activePieces)
             return activePieces
         }
@@ -248,10 +284,12 @@ define([
     }
 
     function pieceHighlighter(arr) {
+        console.log("pieceHighlighter run...., add event listener on span inside:", arr)
+        currentMoveActivePieces = arr
         arr.forEach((elId) => {
             let addId = cellState[turn].activePiece
             let highlightEl = document.getElementById(elId).childNodes[0]
-            console.log(document.getElementById(elId).childNodes[0])
+            console.log(highlightEl)
 
             highlightEl.setAttribute('id', addId)
             highlightEl.addEventListener('click', allowedMoves)
@@ -262,7 +300,7 @@ define([
         arr.forEach((elId) => {
             console.log(document.getElementById(elId).childNodes[0])
             let span = document.getElementById(elId).childNodes[0]
-            span.removeEventListener('click', allowedMoves)
+            document.getElementById(elId).removeEventListener('click', allowedMoves)
             span.removeAttribute('id')
         })
     }
@@ -299,7 +337,7 @@ define([
         console.log("allowedMoves run...")
         // Guard - function must do nothing if not clicked on proper part of board
         if (cells.indexOf(cellCont) === -1 || cellCont.getAttribute('id') === 'board') return
-
+        
         // Removing previous highlighting if player changes his mind and choses different piece. Highlight cells array in this case already have elements (id)
         if (highlightCells.length > 0) {
             emptyCellHighlightRemove(highlightCells)
@@ -310,48 +348,27 @@ define([
         let curRowIdx = parseInt(currentElId[1])
         let curColIdx = parseInt(currentElId[3])
         console.log(`This is chosen piece current coordinates: r${curRowIdx}, c${curColIdx}`)
-        // Next logic depend on type of piece...
+        
+        
+        // checking for mandatory jumps for current cell...
+ 
+        
         // if current board cell has value 1 or -1
         if (board[curRowIdx][curColIdx] === turn) {
             console.log("Its a regular piece")
-            // for being open for the move cells must be empty, be on the next row and have columns values + 1 and -1 from current:
-            //index of the next row in the board array:
-            let checkRow = curRowIdx + turn
-            // creating an array of two possible for move cells to check 
-            let checkCellsVals = [board[checkRow][curColIdx + 1], board[checkRow][curColIdx - 1]]
-            // saving these cells' ids
-            let checkCellsIds = [`r${checkRow}c${curColIdx + 1}`, `r${checkRow}c${curColIdx - 1}`]
-            // filtering the array to find a cell that has a value 0 and pushing into available moves
-            checkCellsVals.map((cell, idx) => {
-                if (cell === 0) {
-                    availableMoves.push(checkCellsIds[idx])
-                }
-            })
+            let aheadResults = checkMoveAhead(currentElId)
+            aheadResults.forEach(el => availableMoves.push(el))
             // if current board cell has value 2 or -2
         } else if (board[curRowIdx][curColIdx] === turn * 2) {
             console.log("Its a KING")
-            console.log(`This is King's current coordinates: r${curRowIdx}, c${curColIdx}`)
-            // for being open for the move cell must be empty, be on a next or pevious row and have column value +1 and -1 from current:
-            //index of the next row in the board array:
-            let checkRows = [[curRowIdx + turn], [curRowIdx - turn]]
-            // creating an array of two possible for move cells to check 
-            let checkCellsVals = []
-            // saving these cells' ids
-            let checkCellsIds = []
-            checkRows.map((el) => {
-                checkCellsVals.push(board[el][curColIdx + 1])
-                checkCellsIds.push(`r${el}c${curColIdx + 1}`)
-                checkCellsVals.push(board[el][curColIdx - 1])
-                checkCellsIds.push(`r${el}c${curColIdx - 1}`)
-            })
-            // filtering the array to find a cell that has a value 0 and pushing into available moves
-            checkCellsVals.map((cell, idx) => {
-                if (cell === 0) {
-                    availableMoves.push(checkCellsIds[idx])
-                }
-            })
+            let results = []
+            let aheadResults = checkMoveAhead(currentElId)
+            let behindResults = checkMoveBehind(currentElId)
+            aheadResults.forEach(el => availableMoves.push(el))
+            behindResults.forEach(el => availableMoves.push(el))
         }
-        // checking for mandatory jumps for current cell...
+
+
         let mJumps = mandatoryJumps([currentElId])
         // highlighting available cells upon results:
         if (mJumps.length == 0) {
@@ -365,8 +382,10 @@ define([
 
                 currentActiveCell.addEventListener('click', processMove)
             })
+
             emptyCellHighlighter(availableMoves)
             console.log("Allowed moves return")
+
             return availableMoves
         } else {
             console.log("YOU MUST JUMP:", mJumps)
@@ -378,11 +397,142 @@ define([
                 console.log(chosenPiece)
                 currentActiveCell.addEventListener('click', processMove)
             })
+
             console.log("Allowed moves return, HAVE TO JUMP")
             return mJumps
+        } 
+        
+
+
+    }
+
+
+    function checkMoveAhead(idString) {
+        console.log("Check move ahead run...", idString)
+        let emptyCellsAhead = []
+        let curRowIdx = parseInt(idString[1])
+        let curColIdx = parseInt(idString[3])
+        // outsideBoard Guard
+        if (!board[curRowIdx + turn]) { return }
+        let checkRow = curRowIdx + turn
+        let checkCellsVals = [board[checkRow][curColIdx + 1], board[checkRow][curColIdx - 1]]
+        let checkCellsIds = [`r${checkRow}c${curColIdx + 1}`, `r${checkRow}c${curColIdx - 1}`]
+        checkCellsVals.map((cell, idx) => {
+            if (cell === 0) {
+                emptyCellsAhead.push(checkCellsIds[idx])
+            }
+        })
+        // Return empty cells for move inside the board
+        console.log("CheckmoveAhead return...", emptyCellsAhead)
+        return emptyCellsAhead
+    }
+    function checkMoveBehind(idString) {
+        console.log("Check move behind run...", idString)
+        let emptyCellsBehind = []
+        let curRowIdx = parseInt(idString[1])
+        let curColIdx = parseInt(idString[3])
+
+        if (!board[curRowIdx - turn]) { retrun }
+        let checkRow = curRowIdx - turn
+        let checkCellsVals = [board[checkRow][curColIdx + 1], board[checkRow][curColIdx - 1]]
+        let checkCellsIds = [`r${checkRow}c${curColIdx + 1}`, `r${checkRow}c${curColIdx - 1}`]
+        checkCellsVals.map((cell, idx) => {
+            if (cell === 0) {
+                emptyCellsBehind.push(checkCellsIds[idx])
+            }
+        })
+        // Return empty cells for move inside the board
+        console.log("Check move behind return...", emptyCellsBehind)
+        return emptyCellsBehind
+    }
+    function checkOpAhead(idString) {
+        console.log("Check move ahead run...", idString)
+        let opCellsAhead = []
+        let curRowIdx = parseInt(idString[1])
+        let curColIdx = parseInt(idString[3])
+        // outsideBoard Guard
+        if (!board[curRowIdx + turn]) { return }
+        let checkRow = curRowIdx + turn
+        let checkCellsVals = [board[checkRow][curColIdx + 1], board[checkRow][curColIdx - 1]]
+        let checkCellsIds = [`r${checkRow}c${curColIdx + 1}`, `r${checkRow}c${curColIdx - 1}`]
+        checkCellsVals.map((cell, idx) => {
+            if (cell === turn * -1 || cell === turn * -2) {
+                opCellsAhead.push(checkCellsIds[idx])
+            }
+        })
+        // Return empty cells for move inside the board
+        console.log("CheckOpAhead return...", opCellsAhead)
+        return opCellsAhead
+    }
+
+    function checkOpBehind(idString) {
+        console.log("Check move behind run...", idString)
+        let opCellsBehind = []
+        let curRowIdx = parseInt(idString[1])
+        let curColIdx = parseInt(idString[3])
+
+        if (!board[curRowIdx - turn]) { retrun }
+        let checkRow = curRowIdx - turn
+        let checkCellsVals = [board[checkRow][curColIdx + 1], board[checkRow][curColIdx - 1]]
+        let checkCellsIds = [`r${checkRow}c${curColIdx + 1}`, `r${checkRow}c${curColIdx - 1}`]
+        checkCellsVals.map((cell, idx) => {
+            if (cell === turn * -1 || cell === turn * -2) {
+                opCellsBehind.push(checkCellsIds[idx])
+            }
+        })
+        // Return empty cells for move inside the board
+        console.log("Check move behind return...", opCellsBehind)
+        return opCellsBehind
+    }
+
+    function checkEmptyAheadOneAfter(idString, oppAhead = []) {
+        console.log("checkEmptyAheadOneAfter run", idString, oppAhead)
+        let mayJump = []
+        // currentId(idString) = 'r5c2'
+        let curRowIdx = parseInt(idString[1])
+        let curColIdx = parseInt(idString[3])
+        // opAhead = ['r4c3']
+        for (let i = 0; i < oppAhead.length; i++) {
+            let opRow = parseInt(oppAhead[i][1])
+            console.log("opRow:", opRow)
+            let opCol = parseInt(oppAhead[i][3])
+            console.log("opCol:", opCol)
+
+            if (!board[opRow + turn]) { 
+                console.log("Guard!!!")
+                return }
+            let checkCol = (opCol - curColIdx)* 2 + curColIdx
+            console.log("checkCol", checkCol)
+            if (board[opRow + turn][checkCol] !== 0) { 
+                console.log(board[opRow + turn][checkCol], "Guard!!!")
+                return }
+            if (board[opRow + turn][checkCol] === 0) {
+                mayJump.push(`r${opRow + turn}c${checkCol}`)
+            }
         }
+        console.log("checkEmptyAheadOneAfter return, may jump here:", mayJump)
+        return mayJump
+    }
 
-
+    function checkEmptyBehindOneAfter(idString, oppBehind) {
+        console.log("ccheckEmptyBehindOneAfter run", idString, oppBehind)
+        let mayJump = []
+        // currentId(idString) = 'r5c2'
+        let curRowIdx = parseInt(idString[1])
+        let curColIdx = parseInt(idString[3])
+        // opAhead = ['r4c3']
+        for (let i = 0; i < oppBehind.length; i++) {
+            let opRow = parseInt(oppBehind[i][1])
+            let opCol = parseInt(oppBehind[i][3])
+            if (!board[opRow - turn]) { retrun }
+            let checkCol = opCol - curColIdx + opCol
+            if (board[opRow - turn][checkCol] !== 0) { return }
+            if (board[opRow - turn][checkCol] === 0) {
+                mayJump.push(`r${opRow - turn}c${checkCol}`)
+            }
+        }
+        console.log("checkEmptyBehindOneAfter return, may jump here:", mayJump)
+        return mayJump
     }
 
 
@@ -405,14 +555,14 @@ define([
             let currentActiveCell = document.getElementById(cell)
             console.log(currentActiveCell)
             currentActiveCell.innerHTML = ''
-            // currentActiveCell.removeEventListener('click', processMove)
-            // currentActiveCell.removeEventListener('click', processJump)
+            currentActiveCell.removeEventListener('click', processMove)
+
 
         })
     }
 
     function mandatoryJumps(array) {
-        console.log("mandatoryJumps run with argument...", array)
+        console.log("mandatoryJumps run with argument...", array, turn)
 
         // function have to check if any mandatory jumps must be made // accepting array of pieces to check. 
         // different behavior for regular and kings pieces
@@ -422,81 +572,42 @@ define([
             let curRowIdx = parseInt(array[i][1])
             let curColIdx = parseInt(array[i][3])
 
+
             // if a regular piece
             if (board[curRowIdx][curColIdx] === turn) {
-
                 //check if any diagonal cells next to current occupied by another player, and if diagonal cells next to them are empty
-                let checkRow = curRowIdx + turn
-                let checkRowIfEmpty = curRowIdx + (2 * turn)
-                let checkOppCells = [board[checkRow][curColIdx + 1], board[checkRow][curColIdx - 1]]
-                let checkOppIds = [`r${checkRow}c${curColIdx + 1}`, `r${checkRow}c${curColIdx - 1}`]
-                // Check for emptyness only direction/-s with cells that have value of opposit player
-                // create array with indexes to check. Will apply these indexes on OP's cells and relevant empty on same index - same direction
-                let checkCellsIfEmpty = []
-                checkOppCells.forEach((el, idx) => {
-                    if (el === turn * -1 || el === turn * -2) {
-                        checkCellsIfEmpty.push(idx)
-                    }
-                })
-                //this is the array of cells that need to be empty for JUMP
-                let emptyCheck = [board[checkRowIfEmpty][curColIdx + 2], board[checkRowIfEmpty][curColIdx - 2]]
-                let emptyCheckIds = [`r${checkRowIfEmpty}c${curColIdx + 2}`, `r${checkRowIfEmpty}c${curColIdx - 2}`]
-                //choosing cells to highlight for mandatory jump
-                checkCellsIfEmpty.forEach((el) => {
-                    if (checkOppCells[el] = turn * -1 && emptyCheck[el] === 0 && emptyCheck[el] !== undefined) {
-                        mandatoryJumpsArr.push(emptyCheckIds[el])
-                        mustJumpPieces.push(array[i])
-                    }
-                })
+                let opAhead =  checkOpAhead(array[i])
+                let emptyAheadAfterOp = checkEmptyAheadOneAfter(array[i], opAhead)
+                if (emptyAheadAfterOp) {
+                    emptyAheadAfterOp.forEach(el => {
+                        mandatoryJumpsArr.push(el)
+                        haveToJumpPieces.push(array[i])
+                    })
+                }
                 // if King
             } else if (board[curRowIdx][curColIdx] === turn * 2) {
-                //check if any diagonal cells next to current occupied by another player, and if diagonal cells next to them are empty
-                let checkRows = [[curRowIdx + turn], [curRowIdx - turn]]
-                let checkRowsIfEmpty = [[curRowIdx + (2 * turn)], [curRowIdx - (2 * turn)]]
-                let checkOppCells = []
-                let checkOppIds = []
-                checkRows.map((el) => {
-                    checkOppCells.push(board[el][curColIdx + 1])
-                    checkOppIds.push(`r${el}c${curColIdx + 1}`)
-                    checkOppCells.push(board[el][curColIdx - 1])
-                    checkOppIds.push(`r${el}c${curColIdx - 1}`)
-                })
-
-                // Check for emptyness only direction/-s with cells that have value of opposit player
-                // create array with indexes to check. Will apply these indexes on OP's cells and relevant empty on same index - same direction
-                let checkCellsIfEmpty = []
-                checkOppCells.forEach((el, idx) => {
-                    //check array checkOppCells (4 diagonal cells next to current piece). Check them for opponent's pieces and write down thir indexes into checkCellsIfEmpty array.
-                    if (el === turn * -1 || el === turn * -2) {
-                        checkCellsIfEmpty.push(idx)
-                    }
-                })
-                console.log(checkCellsIfEmpty)
-                //create arrays of 4 diagonall cells next + 1 to current piece that need to be empty in order to JUMP. One has to be with values and another with indexes 
-                let emptyCheck = []
-                let emptyCheckIds = []
-                checkRowsIfEmpty.map((el) => {
-                    emptyCheck.push(board[el][curColIdx + 2])
-                    emptyCheck.push(board[el][curColIdx - 2])
-                    emptyCheckIds.push(`r${el}c${curColIdx + 2}`)
-                    emptyCheckIds.push(`r${el}c${curColIdx - 2}`)
-                })
-
-                console.log("these are cells to be empty for jump", emptyCheck, emptyCheckIds)
-                //iterating throught array if indexes to check applying the indexes on "diag next cells" and "diag next+1 cells" checking both conditions to match. choosing cells to highlight for mandatory jump
-                checkCellsIfEmpty.forEach((el) => {
-                    // if cell at current index in array next cells belongs to opponent and same index in next +1 array is empty - this is a mandatory jump
-                    if (checkOppCells[el] = turn * -1 && emptyCheck[el] === 0 && emptyCheck[el] !== undefined) {
-                        mandatoryJumpsArr.push(emptyCheckIds[el])
-                        mustJumpPieces.push(array[i])
-
-                    }
-                })
+                let opAhead = checkOpAhead(array[i])
+                let emptyAheadAfterOp = checkEmptyAheadOneAfter(array[i], opAhead)
+                let opBehind = checkOpBehind(array[i])
+                let emptyBehindAfterOp = checkEmptyBehindOneAfter(array[i], opBehind)
+                if (emptyAheadAfterOp) {
+                    emptyAheadAfterOp.forEach(el => {
+                        mandatoryJumpsArr.push(el)
+                        haveToJumpPieces.push(array[i])
+                    })
+                }
+                if (emptyBehindAfterOp) {
+                    emptyBehindAfterOp.forEach(el => {
+                        mandatoryJumpsArr.push(el)
+                        haveToJumpPieces.push(array[i])
+                    })
+                }
             }
 
         }
+        mustJumpPieces = haveToJumpPieces
 
-        console.log("mandatory jumps return", mandatoryJumpsArr, mustJumpPieces)
+        console.log("mandatory jumps return", mandatoryJumpsArr, haveToJumpPieces)
         // function must return an array of indexes requiring a jump
         return mandatoryJumpsArr
 
