@@ -2,11 +2,16 @@
     font-family: Arial, Helvetica, sans-serif;
     box-sizing: border-box;
 }
+header {
+    font-size: 5vmin;
+    color:rgb(24,26,47)
+}
 
 body {
     /* viewport units: vh (viewport height), vw, vmin (smallest between vh & vw) */
     height: 100vh;
-    margin: 0;
+    margin: 10vmin;
+    margin-top:auto;
     font-family: 'Open Sans', sans-serif;
     display: flex;
     flex-direction: column;
@@ -37,8 +42,8 @@ div {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    min-width: 9vmin;
-    min-height: 9vmin;
+    min-width: 8vmin;
+    min-height: 8vmin;
     background: url(yellow.png);
     background-position: center;
     background-repeat: no-repeat;
@@ -65,8 +70,8 @@ div {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    min-width: 9vmin;
-    min-height: 9vmin;
+    min-width: 8vmin;
+    min-height: 8vmin;
     background: url(yellowKing.png);
     background-position: center;
     background-repeat: no-repeat;
@@ -81,8 +86,8 @@ div {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    min-width: 9vmin;
-    min-height: 9vmin;
+    min-width: 8vmin;
+    min-height: 8vmin;
     background: url(blue.png);
     background-position: center;
     background-repeat: no-repeat;
@@ -109,8 +114,8 @@ div {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    min-width: 9vmin;
-    min-height: 9vmin;
+    min-width: 8vmin;
+    min-height: 8vmin;
     background: url(blueKing.png);
     background-position: center;
     background-repeat: no-repeat;
@@ -126,6 +131,36 @@ div {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    min-width: 9vmin;
-    min-height: 9vmin;
+    min-width: 8vmin;
+    min-height: 8vmin;
+}
+
+#game-rules {
+    padding: 5vmin;
+    border: 3px solid rgb(48, 50, 71);
+    max-width: 70vmin;
+    position: absolute;
+    background-color:rgba(255, 252, 231, 0.9);
+    visibility: hidden;
+}
+h1, h2, h3 {
+    text-align: center;
+}
+
+button {
+    color: rgb(24, 26, 47);
+    font-size: 2vmin;
+    height: 3vmin;
+    width: 20vmin;
+    display: block;
+    margin-right:auto;
+    margin-top: 1vmin;
+    background-color: rgb(255, 252, 231);
+    border: 2px solid rgb(48, 50, 71);
+}
+
+button:hover {
+    background-color: rgb(122,137,181);
+    color:rgb(255, 252, 231);
+    border: 2px solid rgb(48, 50, 71);
 }

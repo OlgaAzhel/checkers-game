@@ -1,5 +1,5 @@
 define([
-    'game'
+   
 ], function (require, render) {
     'use strict';
     // render function must use cellState object and board array to update board view according to current game state
@@ -47,6 +47,29 @@ define([
         })
     }
 
+    function renderControllers() {
+        document.getElementById("rules").addEventListener('click', function(){
+            document.getElementById("game-rules").style.visibility = "visible"
+            document.getElementById("close-rules").addEventListener('click',function(){
+                document.getElementById("game-rules").style.visibility = "hidden"
+            } )
+        })
+        document.getElementById("new-game").addEventListener('click', function(){
+            board = [
+                [0, 1, 0, 1, 0, 1, 0, 1],
+                [1, 0, 1, 0, 1, 0, 1, 0],
+                [0, 1, 0, 1, 0, 1, 0, 1],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [-1, 0, -1, 0, -1, 0, -1, 0],
+                [0, -1, 0, -1, 0, -1, 0, -1],
+                [-1, 0, -1, 0, -1, 0, -1, 0]
+            ]
+            turn = 1
+            init()
+        })
+    }
+
     let board = [
         [0, 1, 0, 1, 0, 1, 0, 1],
         [1, 0, 1, 0, 1, 0, 1, 0],
@@ -78,6 +101,7 @@ define([
     init()
     //start of the game
     function init() {
+        renderControllers()
         console.log("CURRENT TURN", turn)
         renderPieces()
         if (mightHavToJumpPieces.length > 0) {
@@ -538,8 +562,7 @@ define([
             console.log("checkCol", checkCol)
             if (board[opRow + turn][checkCol] !== 0) { 
                 console.log(board[opRow + turn][checkCol], "Guard!!!")
-                return }
-            if (board[opRow + turn][checkCol] === 0) {
+            } else if (board[opRow + turn][checkCol] === 0) {
                 mayJump.push(`r${opRow + turn}c${checkCol}`)
             }
         }
