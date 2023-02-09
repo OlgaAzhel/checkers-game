@@ -49,15 +49,15 @@ define([
 
     let board = [
         [0, 1, 0, 1, 0, 1, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0],
-        [0, 1, 0, 2, 0, 1, 0, 1],
-        [0, 0, 1, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, -1],
-        [0, 0, -1, 0, -2, 0, -1, 0],
-        [0, -1, 0, 0, 0, -1, 0, -1],
-        [-1, 0, -1, 0, -1, 0, -1, 0]
+        [1, 0, 1, 0, 1, 0, 1, 0],
+        [0, 1, 0, 1, 0, 1, 0, 1],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [-1,0,-1, 0,-1, 0,-1, 0],
+        [0,-1, 0,-1, 0,-1, 0,-1],
+        [-1, 0,-1, 0,-1, 0,-1, 0]
     ]
-    let turn = -1
+    let turn = 1
 
     // need for guard option -  an array of cells divs only
     let cells = [...document.querySelectorAll('#board > div')]
@@ -159,16 +159,26 @@ define([
             let newRow = parseInt(cellTo[1])
             let currentCol = parseInt(cellFrom[3])
             let newCol = parseInt(cellTo[3])
-
-            currentMoveActivePieces = []
+            let currentValue = board[currentRow][currentCol]
             //If piece reaches last row as a result of the move it turns into a king:
-            if (board[newRow][newCol] === turn && ((turn === -1 && board[newRow] === 0) || (turn === 1 && board[newRow] === 7)) )  {
-                board[newRow][newCol] = turn*2
+            if  ((turn === -1 && newRow === 0) || (turn === 1 && newRow === 7)) {
+                if(board[currentRow][currentCol] === turn) {
+                    console.log("TURNING INTO KING!!!")
+                    board[newRow][newCol] = turn * 2
+                    console.log(board[newRow][newCol])
+                } else if (board[currentRow][currentCol] === turn * 2) {
+                    console.log("THIS IS KING ALREADY!!!")
+                    board[newRow][newCol] = currentValue
+                    board[currentRow][currentCol] = 0
+                    init()
+                }
                 
-            } 
+            } else {
+                
+                board[newRow][newCol] = currentValue
+            }
+
             board[currentRow][currentCol] = 0
-            board[newRow][newCol] = turn
-        
             turn = turn * -1
             console.log('Switching TURN to:', turn)
             init()
@@ -190,10 +200,20 @@ define([
             let opRow = (newRow - currentRow) / 2 + currentRow
             board[opRow][opCol] = 0;
             //If piece reaches last row as a result of the jump it turns into a king:
-            if (board[newRow][newCol] === turn && ((turn === -1 && board[newRow] === 0) || (turn === 1 && board[newRow] === 7))) {
-                board[newRow][newCol] = turn * 2
-                board[currentRow][currentCol] = 0
-                init()
+            if ((turn === -1 && newRow === 0) || (turn === 1 && newRow === 7)) {
+                if (board[currentRow][currentCol] === turn) {
+                    console.log("TURNING INTO KING!!!")
+                    board[newRow][newCol] = turn * 2
+                    board[currentRow][currentCol] = 0
+                    init()
+                } else if (board[currentRow][currentCol] === turn *2) {
+                    console.log("THIS IS KING ALREADY!!!")
+                    board[newRow][newCol] = currentValue
+                    board[currentRow][currentCol] = 0
+                    init()
+                }
+
+
             } else {
                 board[newRow][newCol] = currentValue
                 board[currentRow][currentCol] = 0
@@ -201,18 +221,9 @@ define([
                 console.log("CHECK IF THIS PIECE HAVE TO JUMP AGAIN:", cellTo, mightHavToJumpPieces)
                 init()
             }
-            
-
-        
-
-
 
 
     }
-
-
-
-
 
 
     function highlightPieces(mjArray) {
@@ -273,6 +284,7 @@ define([
                         // saving these cells' ids
                         let checkCellsIds = []
                         checkRows.map((el) => {
+                            if (el < 0 || el > 7) {return }
                             checkCellsVals.push(board[el][colIdx + 1])
                             checkCellsIds.push(`r${el}c${colIdx + 1}`)
                             checkCellsVals.push(board[el][colIdx - 1])
@@ -380,8 +392,13 @@ define([
             let results = []
             let aheadResults = checkMoveAhead(currentElId)
             let behindResults = checkMoveBehind(currentElId)
-            aheadResults.forEach(el => availableMoves.push(el))
-            behindResults.forEach(el => availableMoves.push(el))
+            if(aheadResults) {
+                aheadResults.forEach(el => availableMoves.push(el))
+            }
+            if (behindResults) {
+                behindResults.forEach(el => availableMoves.push(el))
+            }
+            
         }
 
 
@@ -448,7 +465,7 @@ define([
         let curRowIdx = parseInt(idString[1])
         let curColIdx = parseInt(idString[3])
 
-        if (!board[curRowIdx - turn]) { retrun }
+        if (!board[curRowIdx - turn]) { return }
         let checkRow = curRowIdx - turn
         let checkCellsVals = [board[checkRow][curColIdx + 1], board[checkRow][curColIdx - 1]]
         let checkCellsIds = [`r${checkRow}c${curColIdx + 1}`, `r${checkRow}c${curColIdx - 1}`]
@@ -487,7 +504,7 @@ define([
         let curRowIdx = parseInt(idString[1])
         let curColIdx = parseInt(idString[3])
 
-        if (!board[curRowIdx - turn]) { retrun }
+        if (!board[curRowIdx - turn]) { return }
         let checkRow = curRowIdx - turn
         let checkCellsVals = [board[checkRow][curColIdx + 1], board[checkRow][curColIdx - 1]]
         let checkCellsIds = [`r${checkRow}c${curColIdx + 1}`, `r${checkRow}c${curColIdx - 1}`]
@@ -537,10 +554,11 @@ define([
         let curRowIdx = parseInt(idString[1])
         let curColIdx = parseInt(idString[3])
         // opAhead = ['r4c3']
+        if (!oppBehind) { return }
         for (let i = 0; i < oppBehind.length; i++) {
             let opRow = parseInt(oppBehind[i][1])
             let opCol = parseInt(oppBehind[i][3])
-            if (!board[opRow - turn]) { retrun }
+            if (!board[opRow - turn]) { return }
             let checkCol = opCol - curColIdx + opCol
             if (board[opRow - turn][checkCol] !== 0) { return }
             if (board[opRow - turn][checkCol] === 0) {
