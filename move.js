@@ -1,5 +1,5 @@
 define([
-   
+
 ], function (require, render) {
     'use strict';
     // render function must use cellState object and board array to update board view according to current game state
@@ -48,13 +48,15 @@ define([
     }
 
     function renderControllers() {
-        document.getElementById("rules").addEventListener('click', function(){
+
+
+        document.getElementById("rules").addEventListener('click', function () {
             document.getElementById("game-rules").style.visibility = "visible"
-            document.getElementById("close-rules").addEventListener('click',function(){
+            document.getElementById("close-rules").addEventListener('click', function () {
                 document.getElementById("game-rules").style.visibility = "hidden"
-            } )
+            })
         })
-        document.getElementById("new-game").addEventListener('click', function(){
+        document.getElementById("new-game").addEventListener('click', function () {
             board = [
                 [0, 1, 0, 1, 0, 1, 0, 1],
                 [1, 0, 1, 0, 1, 0, 1, 0],
@@ -67,20 +69,86 @@ define([
             ]
             turn = 1
             init()
+            winStylingRemove()
         })
     }
 
+
     let board = [
-        [0, 1, 0, 1, 0, 1, 0, 1],
-        [1, 0, 1, 0, 1, 0, 1, 0],
-        [0, 1, 0, 1, 0, 1, 0, 1],
         [0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0],
-        [-1,0,-1, 0,-1, 0,-1, 0],
-        [0,-1, 0,-1, 0,-1, 0,-1],
-        [-1, 0,-1, 0,-1, 0,-1, 0]
+        [0, 0, 0, -1, 0, 0, 0, 0],
+        [0, 0, 0, 0, 1, 0, 0, 0],
+        [0, 0, 0, -1, 0, 0, 0, 0],
+        [0, 0, -1, 0, 0, 0, -1, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0]
     ]
-    let turn = 1
+
+    function renderWin() {
+        let winnerEl = document.getElementById(`player${turn * -1}`)
+        console.log("RENDER WINNER", document.querySelector(`.sturn${turn*-1}`))
+
+        document.querySelector(`.sturn${turn*-1}`).innerText = " WIN !"
+
+        console.log(winnerEl.innerHTML)
+        winnerEl.style.minHeight = "5vmin"
+        winnerEl.style.fontSize = "2vmin"
+        winnerEl.style.border = "4px solid rgb(48, 50, 71)"
+        document.getElementById('new-game').style.border = "4px solid rgb(48, 50, 71)"
+        document.getElementById('new-game').style.minHeight = "5vmin"
+
+
+    }
+
+    function winStylingRemove() {
+        console.log("Win styling removing...")
+        document.getElementById('new-game').style.minHeight = "4vmin"
+        document.getElementById('new-game').style.border = "2px solid rgb(48, 50, 71)"
+        document.getElementById(`player${turn}`).style.minHeight = "4vmin"
+        document.getElementById(`player${turn}`).style.fontSize = ""
+        document.getElementById(`player${turn}`).style.border = ""
+        document.getElementById('player1').innerHTML = `<span class="name1">Player1</span><span class="sturn1">'s turn</span>`
+        document.getElementById('player-1').innerHTML = `<span class="name-1">Player2</span><span class="sturn-1">'s turn</span>`
+    }
+
+    function turnIndicator(turn) {
+        let indicatorRemove = document.getElementById(`turn${turn * -1}`)
+        indicatorRemove.style.visibility = "hidden"
+
+        let indicator = document.getElementById(`turn${turn}`)
+        indicator.style.visibility = "visible"
+    }
+
+    // <div class="player">
+    //     <section id="player-1">
+    //         <span class="name-1">Player2</span>
+    //         <span class="sturn-1">'s turn</span>
+    //     </section>
+    // </div>
+
+    function turnWordToggle() {
+        let turnWordAdd = document.querySelector(`.sturn${turn}`)
+        turnWordAdd.style.visibility = "visible"
+        let turnWordRemove = document.querySelector(`.sturn${turn * -1}`)
+        turnWordRemove.style.visibility = "hidden"
+
+    }
+
+
+
+    // let board = [
+    //     [0, 1, 0, 1, 0, 1, 0, 1],
+    //     [1, 0, 1, 0, 1, 0, 1, 0],
+    //     [0, 1, 0, 1, 0, 1, 0, 1],
+    //     [0, 0, 0, 0, 0, 0, 0, 0],
+    //     [0, 0, 0, 0, 0, 0, 0, 0],
+    //     [-1, 0, -1, 0, -1, 0, -1, 0],
+    //     [0, -1, 0, -1, 0, -1, 0, -1],
+    //     [-1, 0, -1, 0, -1, 0, -1, 0]
+    // ]
+
+
 
     // need for guard option -  an array of cells divs only
     let cells = [...document.querySelectorAll('#board > div')]
@@ -95,40 +163,57 @@ define([
     let currentMoveActivePieces = []
     let chosenPiece = ''
     let chosenCell = ''
+    let winner = null
+    let turn = 1
     /////////////////// Functions ////////////////////
 
 
     init()
     //start of the game
     function init() {
-        renderControllers()
-        console.log("CURRENT TURN", turn)
-        renderPieces()
-        if (mightHavToJumpPieces.length > 0) {
-            // if any pieces left to continue jump
-            console.log("CONTINUE JUMP SITUATION....")
-            let checkIfJumpAgain = mandatoryJumps(mightHavToJumpPieces)
-
-            if (checkIfJumpAgain.length === 0) {
-                mightHavToJumpPieces = []
-                currentMoveActivePieces = []
-                turn = turn * -1
-                init()
-            } else {
-                highlightPieces(mustJumpPieces)
+        checkWinner(board)
+        if (winner === turn * -1) {
+            renderWin()
+            if (winner) {
+                // winStylingRemove()
+                winner = null
+                turn = null
             }
-
         } else {
-            // looking for mandatory moves on the board
-            let checkBoard = boardToIDarray(board)
-            console.log("NEW MOVE SITUATION....")
-            mandatoryJumps(checkBoard)
-            if (mustJumpPieces.length > 0) {
-                highlightPieces(mustJumpPieces)
+            // winStylingRemove()
+            renderControllers()
+
+
+            console.log("CURRENT TURN", turn)
+            turnIndicator(turn)
+            turnWordToggle()
+            renderPieces()
+            if (mightHavToJumpPieces.length > 0) {
+                // if any pieces left to continue jump
+                console.log("CONTINUE JUMP SITUATION....")
+                let checkIfJumpAgain = mandatoryJumps(mightHavToJumpPieces)
+
+                if (checkIfJumpAgain.length === 0) {
+                    mightHavToJumpPieces = []
+                    currentMoveActivePieces = []
+                    turn = turn * -1
+                    init()
+                } else {
+                    highlightPieces(mustJumpPieces)
+                }
 
             } else {
-                highlightPieces()
-                //and add event listeners to active pieces
+                // looking for mandatory moves on the board
+                let checkBoard = boardToIDarray(board)
+                console.log("NEW MOVE SITUATION....")
+                mandatoryJumps(checkBoard)
+                if (mustJumpPieces.length > 0) {
+                    highlightPieces(mustJumpPieces)
+
+                } else {
+                    highlightPieces()
+                    //and add event listeners to active pieces
+                }
             }
         }
 
@@ -158,61 +243,61 @@ define([
         console.log(" NEED TO UPDATE BOARD:", chosenPiece, chosenCell)
         boardUpdate(chosenPiece, chosenCell)
         // if no more mandatory jumps - change turn 
-        
+
     }
 
     function boardUpdate(cellFrom, cellTo) {
         console.log("boardUpdate run...")
         let currentRow = parseInt(cellFrom[1])
         let newRow = parseInt(cellTo[1])
-        if (currentRow + 1 === newRow || currentRow - 1 === newRow){
+        if (currentRow + 1 === newRow || currentRow - 1 === newRow) {
             moveOnBoard(cellFrom, cellTo)
         } else if (currentRow + 2 === newRow || currentRow - 2 === newRow) {
             jumpOnBoard(cellFrom, cellTo)
         }
-            
-       
-            console.log("Its a King board update...")
-        }
 
 
-        function moveOnBoard(cellFrom, cellTo) {
+        console.log("Its a King board update...")
+    }
 
-            console.log("Updating BOARD after regular move..", cellFrom, cellTo)
-            let currentRow = parseInt(cellFrom[1])
-            let newRow = parseInt(cellTo[1])
-            let currentCol = parseInt(cellFrom[3])
-            let newCol = parseInt(cellTo[3])
-            let currentValue = board[currentRow][currentCol]
-            //If piece reaches last row as a result of the move it turns into a king:
-            if  ((turn === -1 && newRow === 0) || (turn === 1 && newRow === 7)) {
-                if(board[currentRow][currentCol] === turn) {
-                    console.log("TURNING INTO KING!!!")
-                    board[newRow][newCol] = turn * 2
-                    console.log(board[newRow][newCol])
-                } else if (board[currentRow][currentCol] === turn * 2) {
-                    console.log("THIS IS KING ALREADY!!!")
-                    board[newRow][newCol] = currentValue
-                    board[currentRow][currentCol] = 0
-                    init()
-                }
-                
-            } else {
-                
+
+    function moveOnBoard(cellFrom, cellTo) {
+
+        console.log("Updating BOARD after regular move..", cellFrom, cellTo)
+        let currentRow = parseInt(cellFrom[1])
+        let newRow = parseInt(cellTo[1])
+        let currentCol = parseInt(cellFrom[3])
+        let newCol = parseInt(cellTo[3])
+        let currentValue = board[currentRow][currentCol]
+        //If piece reaches last row as a result of the move it turns into a king:
+        if ((turn === -1 && newRow === 0) || (turn === 1 && newRow === 7)) {
+            if (board[currentRow][currentCol] === turn) {
+                console.log("TURNING INTO KING!!!")
+                board[newRow][newCol] = turn * 2
+                console.log(board[newRow][newCol])
+            } else if (board[currentRow][currentCol] === turn * 2) {
+                console.log("THIS IS KING ALREADY!!!")
                 board[newRow][newCol] = currentValue
+                board[currentRow][currentCol] = 0
+                init()
             }
 
-            board[currentRow][currentCol] = 0
-            turn = turn * -1
-            console.log('Switching TURN to:', turn)
-            init()
-    
+        } else {
 
-            
-        }    
+            board[newRow][newCol] = currentValue
+        }
 
-        function jumpOnBoard(cellFrom, cellTo) {
-            console.log("Updating BOARD after jump move..", cellFrom, cellTo)
+        board[currentRow][currentCol] = 0
+        turn = turn * -1
+        console.log('Switching TURN to:', turn)
+        init()
+
+
+
+    }
+
+    function jumpOnBoard(cellFrom, cellTo) {
+        console.log("Updating BOARD after jump move..", cellFrom, cellTo)
         let currentRow = parseInt(cellFrom[1])
         let newRow = parseInt(cellTo[1])
         let currentCol = parseInt(cellFrom[3])
@@ -220,31 +305,31 @@ define([
         let currentValue = board[currentRow][currentCol]
         console.log("THIS IS CURRENT VALUE:", currentValue)
 
-            let opCol = (newCol - currentCol) / 2 + currentCol
-            let opRow = (newRow - currentRow) / 2 + currentRow
-            board[opRow][opCol] = 0;
-            //If piece reaches last row as a result of the jump it turns into a king:
-            if ((turn === -1 && newRow === 0) || (turn === 1 && newRow === 7)) {
-                if (board[currentRow][currentCol] === turn) {
-                    console.log("TURNING INTO KING!!!")
-                    board[newRow][newCol] = turn * 2
-                    board[currentRow][currentCol] = 0
-                    init()
-                } else if (board[currentRow][currentCol] === turn *2) {
-                    console.log("THIS IS KING ALREADY!!!")
-                    board[newRow][newCol] = currentValue
-                    board[currentRow][currentCol] = 0
-                    init()
-                }
-
-
-            } else {
+        let opCol = (newCol - currentCol) / 2 + currentCol
+        let opRow = (newRow - currentRow) / 2 + currentRow
+        board[opRow][opCol] = 0;
+        //If piece reaches last row as a result of the jump it turns into a king:
+        if ((turn === -1 && newRow === 0) || (turn === 1 && newRow === 7)) {
+            if (board[currentRow][currentCol] === turn) {
+                console.log("TURNING INTO KING!!!")
+                board[newRow][newCol] = turn * 2
+                board[currentRow][currentCol] = 0
+                init()
+            } else if (board[currentRow][currentCol] === turn * 2) {
+                console.log("THIS IS KING ALREADY!!!")
                 board[newRow][newCol] = currentValue
                 board[currentRow][currentCol] = 0
-                mightHavToJumpPieces.push(cellTo)
-                console.log("CHECK IF THIS PIECE HAVE TO JUMP AGAIN:", cellTo, mightHavToJumpPieces)
                 init()
             }
+
+
+        } else {
+            board[newRow][newCol] = currentValue
+            board[currentRow][currentCol] = 0
+            mightHavToJumpPieces.push(cellTo)
+            console.log("CHECK IF THIS PIECE HAVE TO JUMP AGAIN:", cellTo, mightHavToJumpPieces)
+            init()
+        }
 
 
     }
@@ -308,7 +393,7 @@ define([
                         // saving these cells' ids
                         let checkCellsIds = []
                         checkRows.map((el) => {
-                            if (el < 0 || el > 7) {return }
+                            if (el < 0 || el > 7) { return }
                             checkCellsVals.push(board[el][colIdx + 1])
                             checkCellsIds.push(`r${el}c${colIdx + 1}`)
                             checkCellsVals.push(board[el][colIdx - 1])
@@ -389,7 +474,7 @@ define([
         console.log("allowedMoves run...")
         // Guard - function must do nothing if not clicked on proper part of board
         if (cells.indexOf(cellCont) === -1 || cellCont.getAttribute('id') === 'board') return
-        
+
         // Removing previous highlighting if player changes his mind and choses different piece. Highlight cells array in this case already have elements (id)
         if (highlightCells.length > 0) {
             emptyCellHighlightRemove(highlightCells)
@@ -400,11 +485,11 @@ define([
         let curRowIdx = parseInt(currentElId[1])
         let curColIdx = parseInt(currentElId[3])
         console.log(`This is chosen piece current coordinates: r${curRowIdx}, c${curColIdx}`)
-        
-        
+
+
         // checking for mandatory jumps for current cell...
- 
-        
+
+
         // if current board cell has value 1 or -1
         if (board[curRowIdx][curColIdx] === turn) {
             console.log("Its a regular piece")
@@ -416,13 +501,13 @@ define([
             let results = []
             let aheadResults = checkMoveAhead(currentElId)
             let behindResults = checkMoveBehind(currentElId)
-            if(aheadResults) {
+            if (aheadResults) {
                 aheadResults.forEach(el => availableMoves.push(el))
             }
             if (behindResults) {
                 behindResults.forEach(el => availableMoves.push(el))
             }
-            
+
         }
 
 
@@ -457,8 +542,8 @@ define([
 
             console.log("Allowed moves return, HAVE TO JUMP")
             return mJumps
-        } 
-        
+        }
+
 
 
     }
@@ -555,12 +640,13 @@ define([
             let opCol = parseInt(oppAhead[i][3])
             console.log("opCol:", opCol)
 
-            if (!board[opRow + turn]) { 
+            if (!board[opRow + turn]) {
                 console.log("Guard!!!")
-                return }
-            let checkCol = (opCol - curColIdx)* 2 + curColIdx
+                return
+            }
+            let checkCol = (opCol - curColIdx) * 2 + curColIdx
             console.log("checkCol", checkCol)
-            if (board[opRow + turn][checkCol] !== 0) { 
+            if (board[opRow + turn][checkCol] !== 0) {
                 console.log(board[opRow + turn][checkCol], "Guard!!!")
             } else if (board[opRow + turn][checkCol] === 0) {
                 mayJump.push(`r${opRow + turn}c${checkCol}`)
@@ -633,7 +719,7 @@ define([
             // if a regular piece
             if (board[curRowIdx][curColIdx] === turn) {
                 //check if any diagonal cells next to current occupied by another player, and if diagonal cells next to them are empty
-                let opAhead =  checkOpAhead(array[i])
+                let opAhead = checkOpAhead(array[i])
                 let emptyAheadAfterOp = checkEmptyAheadOneAfter(array[i], opAhead)
                 if (emptyAheadAfterOp) {
                     emptyAheadAfterOp.forEach(el => {
@@ -668,6 +754,20 @@ define([
         // function must return an array of indexes requiring a jump
         return mandatoryJumpsArr
 
+    }
+
+    function checkWinner(board) {
+        let pieceCounter = 0
+        board.forEach((row, rowIdx) => {
+            row.forEach((cell, cellIdx) => {
+                if (cell === turn || cell === turn * 2) {
+                    pieceCounter += 1
+                }
+            })
+        })
+        if (pieceCounter === 0) {
+            winner = turn * -1
+        }
     }
 
 

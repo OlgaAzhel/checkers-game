@@ -2,16 +2,17 @@
     font-family: Arial, Helvetica, sans-serif;
     box-sizing: border-box;
 }
+
 header {
-    font-size: 5vmin;
-    color:rgb(24,26,47)
+    font-size: 4vmin;
+    color: rgb(24, 26, 47)
 }
 
 body {
     /* viewport units: vh (viewport height), vw, vmin (smallest between vh & vw) */
     height: 100vh;
     margin: 10vmin;
-    margin-top:auto;
+    margin-top: auto;
     font-family: 'Open Sans', sans-serif;
     display: flex;
     flex-direction: column;
@@ -20,10 +21,30 @@ body {
 }
 
 
+
+#top, #bottom {
+    min-height: 10vmin;
+    max-width: 72vmin;
+    display: grid;
+    grid-template-columns:6fr 1fr 3fr;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+
+}
+
+.player {
+    display: flex;
+    flex-direction: row;
+        justify-content: center;
+        align-items: center;
+}
+
+
 #board {
     display: grid;
-    grid-template-columns: repeat(8, 10vmin);
-    grid-template-rows: repeat(8, 10vmin);
+    grid-template-columns: repeat(8, 9vmin);
+    grid-template-rows: repeat(8, 9vmin);
     border: 10px solid rgb(48, 50, 71);
     background-color: rgb(255, 252, 231);
 }
@@ -100,7 +121,8 @@ div {
     opacity: 1;
 }
 
-#blueA:hover, .blueKing-active:hover {
+#blueA:hover,
+.blueKing-active:hover {
     box-shadow: 0.5vmin 0.5vmin rgba(48, 50, 71, 0.5);
     align-self: flex-start;
     padding-top: 0;
@@ -140,27 +162,76 @@ div {
     border: 3px solid rgb(48, 50, 71);
     max-width: 70vmin;
     position: absolute;
-    background-color:rgba(255, 252, 231, 0.9);
+    background-color: rgba(255, 252, 231, 0.9);
     visibility: hidden;
 }
-h1, h2, h3 {
+
+h1,
+h2,
+h3 {
     text-align: center;
+}
+.buttons {
+    display: flex;
+        flex-direction: row;
+        justify-content: flex-start;
+        align-items: center;
 }
 
 button {
+
     color: rgb(24, 26, 47);
-    font-size: 2vmin;
-    height: 3vmin;
-    width: 20vmin;
-    display: block;
-    margin-right:auto;
-    margin-top: 1vmin;
+    font-size: 1.5vmin;
+    min-height: 4vmin;
+    min-width: 15vmin;
+    margin: 1vmin 1vmin;
+    padding: 1vmin 1vmin;
     background-color: rgb(255, 252, 231);
     border: 2px solid rgb(48, 50, 71);
 }
 
 button:hover {
-    background-color: rgb(122,137,181);
-    color:rgb(255, 252, 231);
+    background-color: rgb(122, 137, 181);
+    color: rgb(255, 252, 231);
     border: 2px solid rgb(48, 50, 71);
+}
+
+#turn1, #turn-1 {
+    visibility: hidden;
+}
+
+.arrow-right {
+    
+    width: 0;
+    height: 0;
+
+    border-left: 4vmin solid rgb(0, 22, 58); 
+
+    border-top: 3vmin solid transparent;
+    border-right: 5vmin solid transparent;
+    border-bottom: 3vmin solid transparent;
+}
+
+.sturn {
+    visibility: hidden;
+}
+
+#player1, #player-1 {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        color: rgb(24, 26, 47);
+            font-size: 1.5vmin;
+            height: 4vmin;
+            min-width: 15vmin;
+            margin: 1vmin 1vmin;
+            padding: 1vmin 1vmin;
+            background-color: rgb(255, 252, 231);
+
+}
+#turn {
+    align-self: flex-end;
+}
+.sturn {
+    visibility: hidden;
 }

@@ -16,9 +16,21 @@
 
 <body>
     <header>CHECKERS</header>
-    <button id="rules">RULES</button>
-    <button id="new-game">NEW GAME</button>
-    <section id#player1><span class="turn"></span>➡️<span>Player 1</span></section>
+    <section id="top">
+        <div class="buttons">
+            <button id="rules">RULES</button>
+        </div>
+        <div id="turn1">
+            <div class="arrow-right"></div>
+        </div>
+        <div class="player">
+            <section id="player1">
+                <span class="name1">Player1</span>
+                <span class="sturn1">'s turn</span>
+            </section>
+        </div>
+    </section>
+
     <section id="board">
         <div id="r0c0">0</div>
         <div style="background-color:rgb(118,137,183)" id="r0c1">1</div>
@@ -94,33 +106,59 @@
         <div style="background-color:rgb(118,137,183)" id="r7c6"></div>
         <div id="r7c7"></div>
     </section>
-    <section id#player1><span class="turn"></span>➡️<span>Player 2</span></section>
-        <section id="game-rules">
-            <h1>Official Checkers Rules</h1>
-            <h2>Game Pieces and Board</h2>
-            Checkers is a board game played between two people on an 8x8 checked board.
-            Each player has 12 pieces that are like flat round disks that fit inside each of the boxes on the board. The pieces
-            are placed on every other dark square and then staggered by rows, like shown on the board. Each Checkers player has
-            different colored pieces.
-            <h2>Taking a Turn</h2>
-            Typically the darker color pieces move first. Each player takes their turn by moving a piece. Pieces are always
-            moved diagonally and can be moved in the following ways:
-            <li>Diagonally in the forward direction (towards the opponent) to the next dark square.</li>
-            <li>If there is one of the opponent's pieces next to a piece and an empty space on the other side, you jump your
-                opponent
-                and remove their piece. You can do multiple jumps if they are lined up in the forward direction.</li>
-            <h4>*** note: if you have a jump, you have no choice but to take it.</h4>
-            <h3>King Pieces:</h3>
-            The last row is called the king row. If you get a piece across the board to the opponent's king row, that piece
-            becomes a king. Another piece is placed onto that piece so it is now two pieces high. King pieces can move in both
-            directions, forward and backward.
-            Once a piece is kinged, the player must wait until the next turn to jump out of the king row.
-            <h2>Winning the Game</h2>
-            You win the game when the opponent has no more pieces or can't move (even if he/she still has pieces). If neither
-            player
-            can move then it is a draw or a tie.
-            <button id="close-rules">Close</button>
-        </section>
+    <section id="bottom">
+        <div class="buttons">
+            <button id="new-game">NEW GAME</button>
+        </div>
+        <div id="turn-1">
+            <div class="arrow-right"></div>
+        </div>
+        <div class="player">
+            <section id="player-1">
+                <span class="name-1">Player2</span>
+                <span class="sturn-1">'s turn</span>
+            </section>
+        </div>
+    </section>
+    <section id="game-rules">
+        <h1>Official Checkers Rules</h1>
+        <h2>Game Pieces and Board</h2>
+        Checkers is a board game played between two people on an 8x8 checked board.
+        Each player has 12 pieces that are like flat round disks that fit inside each of the boxes on the board.
+        The
+        pieces
+        are placed on every other dark square and then staggered by rows, like shown on the board. Each Checkers
+        player has
+        different colored pieces.
+        <h2>Taking a Turn</h2>
+        Typically the darker color pieces move first. Each player takes their turn by moving a piece. Pieces are
+        always
+        moved diagonally and can be moved in the following ways:
+        <li>Diagonally in the forward direction (towards the opponent) to the next dark square.</li>
+        <li>If there is one of the opponent's pieces next to a piece and an empty space on the other side, you
+            jump
+            your
+            opponent
+            and remove their piece. You can do multiple jumps if they are lined up in the forward direction.
+        </li>
+        <h4>*** note: if you have a jump, you have no choice but to take it.</h4>
+        <h3>King Pieces:</h3>
+        The last row is called the king row. If you get a piece across the board to the opponent's king row,
+        that
+        piece
+        becomes a king. Another piece is placed onto that piece so it is now two pieces high. King pieces can
+        move
+        in both
+        directions, forward and backward.
+        Once a piece is kinged, the player must wait until the next turn to jump out of the king row.
+        <h2>Winning the Game</h2>
+        You win the game when the opponent has no more pieces or can't move (even if he/she still has pieces).
+        If
+        neither
+        player
+        can move then it is a draw or a tie.
+        <button id="close-rules">Close</button>
+    </section>
 </body>
 
 </html>
