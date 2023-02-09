@@ -22,23 +22,19 @@ body {
 
 
 
-#top, #bottom {
+#top,
+#bottom {
     min-height: 10vmin;
     max-width: 72vmin;
     display: grid;
-    grid-template-columns:6fr 1fr 3fr;
+    grid-template-columns: 6fr 1fr 3fr;
     flex-direction: row;
     justify-content: center;
     align-items: center;
 
 }
 
-.player {
-    display: flex;
-    flex-direction: row;
-        justify-content: center;
-        align-items: center;
-}
+
 
 
 #board {
@@ -171,11 +167,12 @@ h2,
 h3 {
     text-align: center;
 }
+
 .buttons {
     display: flex;
-        flex-direction: row;
-        justify-content: flex-start;
-        align-items: center;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
 }
 
 button {
@@ -196,16 +193,17 @@ button:hover {
     border: 2px solid rgb(48, 50, 71);
 }
 
-#turn1, #turn-1 {
+#turn1,
+#turn-1 {
     visibility: hidden;
 }
 
 .arrow-right {
-    
+
     width: 0;
     height: 0;
 
-    border-left: 4vmin solid rgb(0, 22, 58); 
+    border-left: 4vmin solid rgb(0, 22, 58);
 
     border-top: 3vmin solid transparent;
     border-right: 5vmin solid transparent;
@@ -216,22 +214,40 @@ button:hover {
     visibility: hidden;
 }
 
-#player1, #player-1 {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        color: rgb(24, 26, 47);
-            font-size: 1.5vmin;
-            height: 4vmin;
-            min-width: 15vmin;
-            margin: 1vmin 1vmin;
-            padding: 1vmin 1vmin;
-            background-color: rgb(255, 252, 231);
+#player1,
+#player-1 {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    color: rgb(24, 26, 47);
+    height: 4vmin;
+    min-width: 15vmin;
+    margin: 1vmin 1vmin;
+    padding: 1vmin 1vmin;
+    background-color: rgb(255, 252, 231);
 
 }
+
 #turn {
     align-self: flex-end;
 }
+
 .sturn {
+    visibility: hidden;
+}
+
+.name1,
+.name-1,
+.sturn {
+    font-size: 2vmin;
+}
+
+.tiemsg {
+    padding: 5vmin;
+    border: 3px solid rgb(48, 50, 71);
+    max-width: 70vmin;
+    max-height: 10vmin;
+    position: absolute;
+    background-color: rgba(255, 252, 231, 0.9);
     visibility: hidden;
 }

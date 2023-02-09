@@ -12,6 +12,108 @@ define([
         '0': { 'class': 'emptyCellA' },
         's': { 'class': 'sleeping' }
     }
+
+
+    // need for guard option -  an array of cells divs only
+    let cells = [...document.querySelectorAll('#board > div')]
+    // This event listener should be set up on array of els returned from  findActivPieces()
+    // document.getElementById('board').addEventListener('click', allowedMoves)
+
+    //////////////// game state variables//////////////
+
+    let highlightCells = [] // cells that should be highlighted
+    let mustJumpPieces = [] // pieces that must jump
+    let mightHavToJumpPieces = []
+    let currentMoveActivePieces = []
+    let chosenPiece = ''
+    let chosenCell = ''
+    let winner = null
+    let turn = 1
+    let board = [
+        [0, 1, 0, 1, 0, 1, 0, 1],
+        [1, 0, 1, 0, 1, 0, 1, 0],
+        [0, 1, 0, 1, 0, 1, 0, 1],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [-1, 0, -1, 0, -1, 0, -1, 0],
+        [0, -1, 0, -1, 0, -1, 0, -1],
+        [-1, 0, -1, 0, -1, 0, -1, 0]
+    ]
+
+
+    // let board = [
+    //     [0, 0, 0, 0, 0, 0, 0, 0],
+    //     [1, 0, 1, 0, 1, 0, 1, 0],
+    //     [0, 1, 0, 1, 0, 1, 0, 1],
+    //     [-1, 0,-1, 0,-1, 0,-1, 0],
+    //     [0,-1, 0,-1, 0,-1, 0,-1],
+    //     [0, 0, -1, 0, 0, 0, -1, 0],
+    //     [0, 0, 0, 0, 0, 0, 0, 0],
+    //     [0, 0, 0, 0, 0, 0, 0, 0]
+    // ]
+
+      /////////////////// Functions ////////////////////
+
+    init()
+    //start of the game
+    function init() {
+        checkWinner(board)
+        if (winner === turn * -1) {
+            renderWin()
+            if (winner) {
+                winner = null
+                turn = null
+            }
+        } else {
+            renderControllers()
+            console.log("CURRENT TURN", turn)
+            turnIndicator(turn)
+            turnWordToggle()
+            renderPieces()
+            if (mightHavToJumpPieces.length > 0) {
+                // if any pieces left to continue jump
+                console.log("CONTINUE JUMP SITUATION....")
+                let checkIfJumpAgain = mandatoryJumps(mightHavToJumpPieces)
+
+                if (checkIfJumpAgain.length === 0) {
+                    mightHavToJumpPieces = []
+                    currentMoveActivePieces = []
+                    turn = turn * -1
+                    init()
+                } else {
+                    highlightPieces(mustJumpPieces)
+                }
+
+            } else {
+                let checkBoard = boardToIDarray(board)
+                mandatoryJumps(checkBoard)
+                console.log("NEW MOVE SITUATION....")
+                if (mustJumpPieces.length > 0) {
+                    highlightPieces(mustJumpPieces)
+
+                } else {
+                    console.log("No mandatory jumps....")
+                    let currentMovePieces = highlightPieces()
+                    if (currentMovePieces.length === 0) {
+                        console.log("This player have no moves! Switch turn..")
+                        turn = turn*-1
+                        let nextMovePieces = highlightPieces()
+                        if(nextMovePieces.length === 0) {
+                            console.log("It's a tie!!")
+                            let tieMsg = document.createElement('div')
+                            tieMsg.innerText = "It's a tie"
+                            tieMsg.classList.add('tiemsg')
+                            document.querySelector('body').appendChild(tieMsg)
+                            tieMsg.style.visibility = "visible"
+                        }
+                    }
+
+                }
+            }
+        }
+
+    }
+
     function renderPieces() {
 
         // iterating through board array to acces value and update the view accordingly
@@ -70,30 +172,21 @@ define([
             turn = 1
             init()
             winStylingRemove()
+            tieMsgRemove()
         })
     }
 
 
-    let board = [
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, -1, 0, 0, 0, 0],
-        [0, 0, 0, 0, 1, 0, 0, 0],
-        [0, 0, 0, -1, 0, 0, 0, 0],
-        [0, 0, -1, 0, 0, 0, -1, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0]
-    ]
 
     function renderWin() {
         let winnerEl = document.getElementById(`player${turn * -1}`)
         console.log("RENDER WINNER", document.querySelector(`.sturn${turn*-1}`))
 
-        document.querySelector(`.sturn${turn*-1}`).innerText = " WIN !"
+        document.querySelector(`.sturn${turn * -1}`).innerHTML = `&#160WIN !`
 
         console.log(winnerEl.innerHTML)
         winnerEl.style.minHeight = "5vmin"
-        winnerEl.style.fontSize = "2vmin"
+
         winnerEl.style.border = "4px solid rgb(48, 50, 71)"
         document.getElementById('new-game').style.border = "4px solid rgb(48, 50, 71)"
         document.getElementById('new-game').style.minHeight = "5vmin"
@@ -105,11 +198,12 @@ define([
         console.log("Win styling removing...")
         document.getElementById('new-game').style.minHeight = "4vmin"
         document.getElementById('new-game').style.border = "2px solid rgb(48, 50, 71)"
-        document.getElementById(`player${turn}`).style.minHeight = "4vmin"
-        document.getElementById(`player${turn}`).style.fontSize = ""
-        document.getElementById(`player${turn}`).style.border = ""
-        document.getElementById('player1').innerHTML = `<span class="name1">Player1</span><span class="sturn1">'s turn</span>`
-        document.getElementById('player-1').innerHTML = `<span class="name-1">Player2</span><span class="sturn-1">'s turn</span>`
+        console.log(document.querySelector(`.player${turn * -1}`))
+        document.getElementById(`player${turn*-1}`).style.minHeight = "4vmin"
+
+        document.getElementById(`player${turn*-1}`).style.border = "0"
+        document.getElementById('player1').innerHTML = `<span class="name1">Player1</span><span class="sturn1"></span>`
+        document.getElementById('player-1').innerHTML = `<span class="name-1">Player2</span><span class="sturn-1"></span>`
     }
 
     function turnIndicator(turn) {
@@ -120,12 +214,6 @@ define([
         indicator.style.visibility = "visible"
     }
 
-    // <div class="player">
-    //     <section id="player-1">
-    //         <span class="name-1">Player2</span>
-    //         <span class="sturn-1">'s turn</span>
-    //     </section>
-    // </div>
 
     function turnWordToggle() {
         let turnWordAdd = document.querySelector(`.sturn${turn}`)
@@ -135,90 +223,11 @@ define([
 
     }
 
-
-
-    // let board = [
-    //     [0, 1, 0, 1, 0, 1, 0, 1],
-    //     [1, 0, 1, 0, 1, 0, 1, 0],
-    //     [0, 1, 0, 1, 0, 1, 0, 1],
-    //     [0, 0, 0, 0, 0, 0, 0, 0],
-    //     [0, 0, 0, 0, 0, 0, 0, 0],
-    //     [-1, 0, -1, 0, -1, 0, -1, 0],
-    //     [0, -1, 0, -1, 0, -1, 0, -1],
-    //     [-1, 0, -1, 0, -1, 0, -1, 0]
-    // ]
-
-
-
-    // need for guard option -  an array of cells divs only
-    let cells = [...document.querySelectorAll('#board > div')]
-    // This event listener should be set up on array of els returned from  findActivPieces()
-    // document.getElementById('board').addEventListener('click', allowedMoves)
-
-    //////////////// game state variables//////////////
-
-    let highlightCells = [] // cells that should be highlighted
-    let mustJumpPieces = [] // pieces that must jump
-    let mightHavToJumpPieces = []
-    let currentMoveActivePieces = []
-    let chosenPiece = ''
-    let chosenCell = ''
-    let winner = null
-    let turn = 1
-    /////////////////// Functions ////////////////////
-
-
-    init()
-    //start of the game
-    function init() {
-        checkWinner(board)
-        if (winner === turn * -1) {
-            renderWin()
-            if (winner) {
-                // winStylingRemove()
-                winner = null
-                turn = null
-            }
-        } else {
-            // winStylingRemove()
-            renderControllers()
-
-
-            console.log("CURRENT TURN", turn)
-            turnIndicator(turn)
-            turnWordToggle()
-            renderPieces()
-            if (mightHavToJumpPieces.length > 0) {
-                // if any pieces left to continue jump
-                console.log("CONTINUE JUMP SITUATION....")
-                let checkIfJumpAgain = mandatoryJumps(mightHavToJumpPieces)
-
-                if (checkIfJumpAgain.length === 0) {
-                    mightHavToJumpPieces = []
-                    currentMoveActivePieces = []
-                    turn = turn * -1
-                    init()
-                } else {
-                    highlightPieces(mustJumpPieces)
-                }
-
-            } else {
-                // looking for mandatory moves on the board
-                let checkBoard = boardToIDarray(board)
-                console.log("NEW MOVE SITUATION....")
-                mandatoryJumps(checkBoard)
-                if (mustJumpPieces.length > 0) {
-                    highlightPieces(mustJumpPieces)
-
-                } else {
-                    highlightPieces()
-                    //and add event listeners to active pieces
-                }
-            }
-        }
-
+    function tieMsgRemove() {
+        let tieMsg = document.querySelector('.tiemsg')
+        console.log("Removing tie msg..", tieMsg)
+        tieMsg.style.visibility = "hidden"
     }
-
 
 
 
@@ -314,11 +323,13 @@ define([
                 console.log("TURNING INTO KING!!!")
                 board[newRow][newCol] = turn * 2
                 board[currentRow][currentCol] = 0
+                mightHavToJumpPieces.push(cellTo)
                 init()
             } else if (board[currentRow][currentCol] === turn * 2) {
                 console.log("THIS IS KING ALREADY!!!")
                 board[newRow][newCol] = currentValue
                 board[currentRow][currentCol] = 0
+                mightHavToJumpPieces.push(cellTo)
                 init()
             }
 
@@ -426,8 +437,6 @@ define([
         arr.forEach((elId) => {
             let addId = cellState[turn].activePiece
             let highlightEl = document.getElementById(elId).childNodes[0]
-            console.log(highlightEl)
-
             highlightEl.setAttribute('id', addId)
             highlightEl.addEventListener('click', allowedMoves)
         })
@@ -435,7 +444,6 @@ define([
     function pieceHighlightRemove(arr) {
         console.log("PiecehighliteRemove run...", arr)
         arr.forEach((elId) => {
-            console.log(document.getElementById(elId).childNodes[0])
             let span = document.getElementById(elId).childNodes[0]
             document.getElementById(elId).removeEventListener('click', allowedMoves)
             span.removeAttribute('id')
