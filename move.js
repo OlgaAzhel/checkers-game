@@ -83,11 +83,11 @@ define([
                     currentMoveActivePieces = []
                     turn = turn * -1
                     init()
-                // if yes- highlighting the piece that have to jump 
+                    // if yes- highlighting the piece that have to jump 
                 } else {
                     highlightPieces(mustJumpPieces)
                 }
-            // If last turn was just a regular move
+                // If last turn was just a regular move
             } else {
                 // cecking for mandatory jumps for a new turn
                 let checkBoard = boardToIDarray(board)
@@ -99,9 +99,9 @@ define([
                     // Changing turn if current player has nowhere to move/ tie if both players have nowhere to move
                     let currentMovePieces = highlightPieces()
                     if (currentMovePieces.length === 0) {
-                        turn = turn*-1
+                        turn = turn * -1
                         let nextMovePieces = highlightPieces()
-                        if(nextMovePieces.length === 0) {
+                        if (nextMovePieces.length === 0) {
                             tie()
                         }
                     }
@@ -175,7 +175,7 @@ define([
 
     function renderWin() {
         let winnerEl = document.getElementById(`player${turn * -1}`)
-        console.log("RENDER WINNER", document.querySelector(`.sturn${turn*-1}`))
+        console.log("RENDER WINNER", document.querySelector(`.sturn${turn * -1}`))
 
         document.querySelector(`.sturn${turn * -1}`).innerHTML = `&#160WINS !`
 
@@ -194,7 +194,7 @@ define([
         document.getElementById('new-game').style.minHeight = "4vmin"
         document.getElementById('new-game').style.border = "2px solid rgb(48, 50, 71)"
         console.log(document.querySelector(`.player${turn * -1}`))
-        document.getElementById(`player${turn*-1}`).style.minHeight = "4vmin"
+        document.getElementById(`player${turn * -1}`).style.minHeight = "4vmin"
         document.getElementById(`player${turn * -1}`).style.border = "2px solid rgb(48, 50, 71)"
     }
 
@@ -226,11 +226,11 @@ define([
     function tieMsgRemove() {
         let tieMsg = document.querySelector('.tiemsg')
         console.log("Removing tie msg..", tieMsg)
-        if(tieMsg) {
-        tieMsg.style.visibility = "hidden"
+        if (tieMsg) {
+            tieMsg.style.visibility = "hidden"
         }
     }
-    
+
     function highlightPieces(mjArray) {
         console.log("highlightPieces run...")
         if (mjArray) {
@@ -253,7 +253,7 @@ define([
                         let addId = cellState[turn].activePieces
                         let c = `${colIdx}`
                         currentId = 'r' + r + 'c' + c
-                        let checkRow = rowIdx + turn  
+                        let checkRow = rowIdx + turn
                         let checkCellsVals = [board[checkRow][colIdx + 1], board[checkRow][colIdx - 1]]
                         let checkCellsIds = [`r${checkRow}c${colIdx + 1}`, `r${checkRow}c${colIdx - 1}`]
                         checkCellsVals.map((maybeEmptyCell, idx) => {
@@ -303,14 +303,7 @@ define([
         })
     }
 
-    function pieceHighlightRemove(arr) {
-        console.log("PiecehighliteRemove run...", arr)
-        arr.forEach((elId) => {
-            let span = document.getElementById(elId).childNodes[0]
-            document.getElementById(elId).removeEventListener('click', allowedMoves)
-            span.removeAttribute('id')
-        })
-    }
+
 
     function boardToIDarray(array) {
         let idArray = []
@@ -320,12 +313,12 @@ define([
                 let newId = `r${i}c${idx}`
                 idArray.push(newId)
             })
-            
+
         })
         return idArray
     }
-    
-    
+
+
     function allowedMoves(evt) {
         let availableMoves = []
         let cellCont = evt.target.parentNode
@@ -349,7 +342,7 @@ define([
             if (behindResults) {
                 behindResults.forEach(el => availableMoves.push(el))
             }
-            
+
         }
         let mJumps = mandatoryJumps([currentElId])
         if (mJumps.length == 0) {
@@ -398,7 +391,7 @@ define([
         let emptyCellsBehind = []
         let curRowIdx = parseInt(idString[1])
         let curColIdx = parseInt(idString[3])
-        
+
         if (!board[curRowIdx - turn]) { return }
         let checkRow = curRowIdx - turn
         let checkCellsVals = [board[checkRow][curColIdx + 1], board[checkRow][curColIdx - 1]]
@@ -431,7 +424,7 @@ define([
         let opCellsBehind = []
         let curRowIdx = parseInt(idString[1])
         let curColIdx = parseInt(idString[3])
-        
+
         if (!board[curRowIdx - turn]) { return }
         let checkRow = curRowIdx - turn
         let checkCellsVals = [board[checkRow][curColIdx + 1], board[checkRow][curColIdx - 1]]
@@ -454,7 +447,7 @@ define([
             console.log("opRow:", opRow)
             let opCol = parseInt(oppAhead[i][3])
             console.log("opCol:", opCol)
-            
+
             if (!board[opRow + turn]) {
                 console.log("Guard!!!")
                 return
@@ -469,7 +462,7 @@ define([
         }
         return mayJump
     }
-    
+
     function checkEmptyBehindOneAfter(idString, oppBehind) {
         let mayJump = []
         let curRowIdx = parseInt(idString[1])
@@ -495,7 +488,7 @@ define([
             let dashedCircle = document.createElement('span')
             dashedCircle.classList.add(addClass)
             currentActiveCell.appendChild(dashedCircle)
-            
+
         })
 
     }
@@ -507,8 +500,8 @@ define([
             console.log(currentActiveCell)
             currentActiveCell.innerHTML = ''
             currentActiveCell.removeEventListener('click', processMove)
-            
-            
+
+
         })
     }
 
@@ -546,7 +539,7 @@ define([
                     })
                 }
             }
-            
+
         }
         mustJumpPieces = haveToJumpPieces
         console.log("mandatory jumps return", mandatoryJumpsArr, haveToJumpPieces)
@@ -566,8 +559,8 @@ define([
             winner = turn * -1
         }
     }
-    
-})
+
+
 
 
 
@@ -578,6 +571,15 @@ define([
         emptyCellHighlightRemove(highlightCells)
         highlightCells = []
         boardUpdate(chosenPiece, chosenCell)
+    }
+
+    function pieceHighlightRemove(arr) {
+        console.log("PiecehighliteRemove run...", arr)
+        arr.forEach((elId) => {
+            let span = document.getElementById(elId).childNodes[0]
+            document.getElementById(elId).removeEventListener('click', allowedMoves)
+            span.removeAttribute('id')
+        })
     }
 
     function boardUpdate(cellFrom, cellTo) {
@@ -654,15 +656,17 @@ define([
 
     }
 
+})
+
 define(function () {
-    
+
     return {
         // add here what to export
         board,
         cells,
         mandatoryJumps,
         allowedMoves
-        
-        
+
+
     }
 });
