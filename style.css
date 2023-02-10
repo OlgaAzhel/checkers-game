@@ -160,13 +160,12 @@ div {
     position: absolute;
     background-color: rgba(255, 252, 231, 0.9);
     visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
 }
 
-h1,
-h2,
-h3 {
-    text-align: center;
-}
 
 .buttons {
     display: flex;
@@ -178,7 +177,7 @@ h3 {
 button {
 
     color: rgb(24, 26, 47);
-    font-size: 1.5vmin;
+    font-size: 3vmin;
     min-height: 4vmin;
     min-width: 15vmin;
     margin: 1vmin 1vmin;
@@ -199,32 +198,29 @@ button:hover {
 }
 
 .arrow-right {
-
     width: 0;
     height: 0;
-
     border-left: 4vmin solid rgb(0, 22, 58);
-
     border-top: 3vmin solid transparent;
     border-right: 5vmin solid transparent;
     border-bottom: 3vmin solid transparent;
 }
 
-.sturn {
-    visibility: hidden;
-}
 
 #player1,
 #player-1 {
+    border: 2px solid rgb(48, 50, 71);
+    font-size: 3vmin;
     display: flex;
     flex-direction: row;
     align-items: center;
     color: rgb(24, 26, 47);
-    height: 4vmin;
+    min-height: 4vmin;
     min-width: 15vmin;
     margin: 1vmin 1vmin;
     padding: 1vmin 1vmin;
     background-color: rgb(255, 252, 231);
+    border: 2px solid rgb(48, 50, 71);
 
 }
 
@@ -238,8 +234,27 @@ button:hover {
 
 .name1,
 .name-1,
-.sturn {
-    font-size: 2vmin;
+.sturn1,
+.sturn-1 {
+    background-color: rgb(255, 252, 231);
+    border: 0;
+    color: rgb(24, 26, 47);
+
+}
+
+
+
+input {
+    padding: 0;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    -webkit-appearance: none;
+    text-align: end;
+    color: rgb(24, 26, 47);
+    min-height: 100%;
+    max-width: 50%;
+    font-size: 3vmin;
 }
 
 .tiemsg {

@@ -16,47 +16,50 @@ define([
 
     // need for guard option -  an array of cells divs only
     let cells = [...document.querySelectorAll('#board > div')]
-    // This event listener should be set up on array of els returned from  findActivPieces()
-    // document.getElementById('board').addEventListener('click', allowedMoves)
 
     //////////////// game state variables//////////////
 
-    let highlightCells = [] // cells that should be highlighted
+    let highlightCells = [] // empty cells to be highlighted for the chosen piece
     let mustJumpPieces = [] // pieces that must jump
-    let mightHavToJumpPieces = []
-    let currentMoveActivePieces = []
+    let mightHaveToJumpPieces = [] // pieces that migh have to continue a jump
+    let currentMoveActivePieces = [] // all pieces that can move at this turn
     let chosenPiece = ''
     let chosenCell = ''
     let winner = null
     let turn = 1
-    let board = [
-        [0, 1, 0, 1, 0, 1, 0, 1],
-        [1, 0, 1, 0, 1, 0, 1, 0],
-        [0, 1, 0, 1, 0, 1, 0, 1],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [-1, 0, -1, 0, -1, 0, -1, 0],
-        [0, -1, 0, -1, 0, -1, 0, -1],
-        [-1, 0, -1, 0, -1, 0, -1, 0]
-    ]
-
-
+    let moveCounter = 0
     // let board = [
-    //     [0, 0, 0, 0, 0, 0, 0, 0],
+    //     [0, 1, 0, 1, 0, 1, 0, 1],
     //     [1, 0, 1, 0, 1, 0, 1, 0],
     //     [0, 1, 0, 1, 0, 1, 0, 1],
-    //     [-1, 0,-1, 0,-1, 0,-1, 0],
-    //     [0,-1, 0,-1, 0,-1, 0,-1],
-    //     [0, 0, -1, 0, 0, 0, -1, 0],
     //     [0, 0, 0, 0, 0, 0, 0, 0],
-    //     [0, 0, 0, 0, 0, 0, 0, 0]
+    //     [0, 0, 0, 0, 0, 0, 0, 0],
+    //     [-1, 0, -1, 0, -1, 0, -1, 0],
+    //     [0, -1, 0, -1, 0, -1, 0, -1],
+    //     [-1, 0, -1, 0, -1, 0, -1, 0]
     // ]
 
-      /////////////////// Functions ////////////////////
+    // Demonstaration board
+
+    let board = [
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 0, 1, 0, 1, 0, 1, 0],
+        [0, 1, 0, 0, 0, 1, 0, 1],
+        [-1,0,-1, 0,-1, 0,-1, 0],
+        [0,-1, 0, 0, 0,-1, 0,-1],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0,-1, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0]
+    ]
+
+    /////////////////// Functions ////////////////////
 
     init()
     //start of the game
     function init() {
+        if (moveCounter === 40) {
+            checkTie()
+        }
         checkWinner(board)
         if (winner === turn * -1) {
             renderWin()
@@ -65,46 +68,40 @@ define([
                 turn = null
             }
         } else {
+            renderPieces()
             renderControllers()
-            console.log("CURRENT TURN", turn)
             turnIndicator(turn)
             turnWordToggle()
-            renderPieces()
-            if (mightHavToJumpPieces.length > 0) {
-                // if any pieces left to continue jump
-                console.log("CONTINUE JUMP SITUATION....")
-                let checkIfJumpAgain = mandatoryJumps(mightHavToJumpPieces)
-
+            // If last turn was a jump and possibly must be continued
+            if (mightHaveToJumpPieces.length > 0) {
+                // checking if that's the case...
+                let checkIfJumpAgain = mandatoryJumps(mightHaveToJumpPieces)
+                // if not, changing turn and restarting init
                 if (checkIfJumpAgain.length === 0) {
-                    mightHavToJumpPieces = []
+                    mightHaveToJumpPieces = []
                     currentMoveActivePieces = []
                     turn = turn * -1
                     init()
+                // if yes- highlighting the piece that have to jump 
                 } else {
                     highlightPieces(mustJumpPieces)
                 }
-
+            // If last turn was just a regular move
             } else {
+                // cecking for mandatory jumps for a new turn
                 let checkBoard = boardToIDarray(board)
                 mandatoryJumps(checkBoard)
-                console.log("NEW MOVE SITUATION....")
                 if (mustJumpPieces.length > 0) {
                     highlightPieces(mustJumpPieces)
 
                 } else {
-                    console.log("No mandatory jumps....")
+                    // Changing turn if current player has nowhere to move/ tie if both players have nowhere to move
                     let currentMovePieces = highlightPieces()
                     if (currentMovePieces.length === 0) {
-                        console.log("This player have no moves! Switch turn..")
                         turn = turn*-1
                         let nextMovePieces = highlightPieces()
                         if(nextMovePieces.length === 0) {
-                            console.log("It's a tie!!")
-                            let tieMsg = document.createElement('div')
-                            tieMsg.innerText = "It's a tie"
-                            tieMsg.classList.add('tiemsg')
-                            document.querySelector('body').appendChild(tieMsg)
-                            tieMsg.style.visibility = "visible"
+                            tie()
                         }
                     }
 
@@ -115,8 +112,7 @@ define([
     }
 
     function renderPieces() {
-
-        // iterating through board array to acces value and update the view accordingly
+        // iterating through board array, acces value of each cell and update the view accordingly
         board.map((rowArr, rowIdx) => {
             let currentId
             let r = `${rowIdx}`
@@ -150,8 +146,6 @@ define([
     }
 
     function renderControllers() {
-
-
         document.getElementById("rules").addEventListener('click', function () {
             document.getElementById("game-rules").style.visibility = "visible"
             document.getElementById("close-rules").addEventListener('click', function () {
@@ -182,7 +176,7 @@ define([
         let winnerEl = document.getElementById(`player${turn * -1}`)
         console.log("RENDER WINNER", document.querySelector(`.sturn${turn*-1}`))
 
-        document.querySelector(`.sturn${turn * -1}`).innerHTML = `&#160WIN !`
+        document.querySelector(`.sturn${turn * -1}`).innerHTML = `&#160WINS !`
 
         console.log(winnerEl.innerHTML)
         winnerEl.style.minHeight = "5vmin"
@@ -200,16 +194,12 @@ define([
         document.getElementById('new-game').style.border = "2px solid rgb(48, 50, 71)"
         console.log(document.querySelector(`.player${turn * -1}`))
         document.getElementById(`player${turn*-1}`).style.minHeight = "4vmin"
-
-        document.getElementById(`player${turn*-1}`).style.border = "0"
-        document.getElementById('player1').innerHTML = `<span class="name1">Player1</span><span class="sturn1"></span>`
-        document.getElementById('player-1').innerHTML = `<span class="name-1">Player2</span><span class="sturn-1"></span>`
+        document.getElementById(`player${turn * -1}`).style.border = "2px solid rgb(48, 50, 71)"
     }
 
     function turnIndicator(turn) {
         let indicatorRemove = document.getElementById(`turn${turn * -1}`)
         indicatorRemove.style.visibility = "hidden"
-
         let indicator = document.getElementById(`turn${turn}`)
         indicator.style.visibility = "visible"
     }
@@ -223,56 +213,47 @@ define([
 
     }
 
+    function checkTie() {
+        console.log("It's a tie!!")
+        let tieMsg = document.createElement('div')
+        tieMsg.innerText = "It's a tie"
+        tieMsg.classList.add('tiemsg')
+        document.querySelector('body').appendChild(tieMsg)
+        tieMsg.style.visibility = "visible"
+    }
+
     function tieMsgRemove() {
         let tieMsg = document.querySelector('.tiemsg')
         console.log("Removing tie msg..", tieMsg)
+        if(tieMsg) {
         tieMsg.style.visibility = "hidden"
+        }
     }
 
-
-
     function processMove(evt) {
-
         chosenCell = evt.target.parentNode.getAttribute('id')
-
-        console.log("PROCESSING A NEW MOVE",
-            "current active ALL:", currentMoveActivePieces,
-            "actingPiece:", chosenPiece,
-            "highlighted cells:", highlightCells
-        )
-
-        // removing highlights and event listeners from currentMoveActivePieces
         pieceHighlightRemove(currentMoveActivePieces)
-        // reset array af highlighted pieces
         currentMoveActivePieces = []
-        // remove event listeners highlited empty cells
         emptyCellHighlightRemove(highlightCells)
         highlightCells = []
-
-        console.log(" NEED TO UPDATE BOARD:", chosenPiece, chosenCell)
         boardUpdate(chosenPiece, chosenCell)
-        // if no more mandatory jumps - change turn 
-
     }
 
     function boardUpdate(cellFrom, cellTo) {
-        console.log("boardUpdate run...")
         let currentRow = parseInt(cellFrom[1])
         let newRow = parseInt(cellTo[1])
         if (currentRow + 1 === newRow || currentRow - 1 === newRow) {
             moveOnBoard(cellFrom, cellTo)
+            moveCounter += 1
         } else if (currentRow + 2 === newRow || currentRow - 2 === newRow) {
             jumpOnBoard(cellFrom, cellTo)
+            moveCounter = 0
         }
-
-
-        console.log("Its a King board update...")
     }
 
 
     function moveOnBoard(cellFrom, cellTo) {
 
-        console.log("Updating BOARD after regular move..", cellFrom, cellTo)
         let currentRow = parseInt(cellFrom[1])
         let newRow = parseInt(cellTo[1])
         let currentCol = parseInt(cellFrom[3])
@@ -290,19 +271,13 @@ define([
                 board[currentRow][currentCol] = 0
                 init()
             }
-
         } else {
-
             board[newRow][newCol] = currentValue
         }
 
         board[currentRow][currentCol] = 0
         turn = turn * -1
-        console.log('Switching TURN to:', turn)
         init()
-
-
-
     }
 
     function jumpOnBoard(cellFrom, cellTo) {
@@ -312,7 +287,6 @@ define([
         let currentCol = parseInt(cellFrom[3])
         let newCol = parseInt(cellTo[3])
         let currentValue = board[currentRow][currentCol]
-        console.log("THIS IS CURRENT VALUE:", currentValue)
 
         let opCol = (newCol - currentCol) / 2 + currentCol
         let opRow = (newRow - currentRow) / 2 + currentRow
@@ -323,34 +297,27 @@ define([
                 console.log("TURNING INTO KING!!!")
                 board[newRow][newCol] = turn * 2
                 board[currentRow][currentCol] = 0
-                mightHavToJumpPieces.push(cellTo)
+                mightHaveToJumpPieces.push(cellTo)
                 init()
             } else if (board[currentRow][currentCol] === turn * 2) {
                 console.log("THIS IS KING ALREADY!!!")
                 board[newRow][newCol] = currentValue
                 board[currentRow][currentCol] = 0
-                mightHavToJumpPieces.push(cellTo)
+                mightHaveToJumpPieces.push(cellTo)
                 init()
             }
-
-
         } else {
             board[newRow][newCol] = currentValue
             board[currentRow][currentCol] = 0
-            mightHavToJumpPieces.push(cellTo)
-            console.log("CHECK IF THIS PIECE HAVE TO JUMP AGAIN:", cellTo, mightHavToJumpPieces)
+            mightHaveToJumpPieces.push(cellTo)
             init()
         }
 
 
     }
 
-
     function highlightPieces(mjArray) {
         console.log("highlightPieces run...")
-        // mandatoryJumps must run before each move
-        // mandatoryJumps check all current turn pieces,  
-        // if mandatiryJumps returns array with length more than 0, this function should return the same array as result
         if (mjArray) {
             console.log("there is mandatory Jump:", mjArray)
             mjArray.forEach((id) => {
@@ -361,12 +328,7 @@ define([
             pieceHighlighter(mjArray)
             return
         } else {
-            // Function will look for pieces that player can choose from to make a new move or to continue jump 
             let activePieces = []
-            // To be active in this turn piece must:
-            // have value of turn or turn * 2
-            // if value of cell = turn
-
             board.forEach((rowArr, rowIdx) => {
                 let currentId
                 let r = `${rowIdx}`
@@ -374,34 +336,24 @@ define([
                     if (cell === 0) return
                     if (cell === turn) {
                         let addId = cellState[turn].activePieces
-                        //have at least one free spot diagonally forward
-                        // this free spot must have coordinates within the board
                         let c = `${colIdx}`
                         currentId = 'r' + r + 'c' + c
-                        let checkRow = rowIdx + turn  //3 + -1 --> 2
-                        // creating an array of two possible for move cells to check 
+                        let checkRow = rowIdx + turn  
                         let checkCellsVals = [board[checkRow][colIdx + 1], board[checkRow][colIdx - 1]]
-                        // saving these cells' ids
                         let checkCellsIds = [`r${checkRow}c${colIdx + 1}`, `r${checkRow}c${colIdx - 1}`]
-                        // filtering the array to find a cell that has a value 0. If any true,we can mark this cell as active
                         checkCellsVals.map((maybeEmptyCell, idx) => {
                             if (maybeEmptyCell === 0) {
                                 activePieces.push(currentId)
                                 let highlightEl = document.getElementById(currentId).childNodes[0]
-
                                 highlightEl.setAttribute('id', addId)
-                                console.log(highlightEl)
                             }
                         })
                     } else if (cell === turn * 2) {
                         let addId = cellState[turn].active
                         let c = `${colIdx}`
                         currentId = 'r' + r + 'c' + c
-                        console.log("checking this for availabale moves:", currentId)
                         let checkRows = [[rowIdx + turn], [rowIdx - turn]]
-                        // creating an array of two possible for move cells to check 
                         let checkCellsVals = []
-                        // saving these cells' ids
                         let checkCellsIds = []
                         checkRows.map((el) => {
                             if (el < 0 || el > 7) { return }
@@ -411,7 +363,6 @@ define([
                             checkCellsIds.push(`r${el}c${colIdx - 1}`)
                         })
 
-                        // filtering the array to find a cell that has a value 0 and pushing into available moves
                         checkCellsVals.map((cell, idx) => {
                             if (cell === 0) {
                                 activePieces.push(currentId)
@@ -424,11 +375,6 @@ define([
             pieceHighlighter(activePieces)
             return activePieces
         }
-
-
-        // highlight active pieces and add event listeners to activePieces
-
-
     }
 
     function pieceHighlighter(arr) {
@@ -441,6 +387,7 @@ define([
             highlightEl.addEventListener('click', allowedMoves)
         })
     }
+
     function pieceHighlightRemove(arr) {
         console.log("PiecehighliteRemove run...", arr)
         arr.forEach((elId) => {
@@ -449,9 +396,6 @@ define([
             span.removeAttribute('id')
         })
     }
-
-
-
 
     function boardToIDarray(array) {
         let idArray = []
@@ -463,49 +407,24 @@ define([
             })
 
         })
-        // console.log("This is ID board", idBoard)
         return idArray
-
     }
-
-
-
 
 
     function allowedMoves(evt) {
         let availableMoves = []
-
-        //since player actually click on span that represent a piece, to access cell id we need access this span's parent
         let cellCont = evt.target.parentNode
-        // Prevent calling highlighter if player click on the same cell again and again. 
-
-        console.log("allowedMoves run...")
-        // Guard - function must do nothing if not clicked on proper part of board
         if (cells.indexOf(cellCont) === -1 || cellCont.getAttribute('id') === 'board') return
-
-        // Removing previous highlighting if player changes his mind and choses different piece. Highlight cells array in this case already have elements (id)
         if (highlightCells.length > 0) {
             emptyCellHighlightRemove(highlightCells)
         }
-        // Accessing and extracting nesessary indexes from chosen piece html id attribute
         let currentElId = cellCont.getAttribute('id')
-        // Since all ids are string of format rXcY having length = 4, we can access their X for row and Y for col
         let curRowIdx = parseInt(currentElId[1])
         let curColIdx = parseInt(currentElId[3])
-        console.log(`This is chosen piece current coordinates: r${curRowIdx}, c${curColIdx}`)
-
-
-        // checking for mandatory jumps for current cell...
-
-
-        // if current board cell has value 1 or -1
         if (board[curRowIdx][curColIdx] === turn) {
-            console.log("Its a regular piece")
             let aheadResults = checkMoveAhead(currentElId)
             aheadResults.forEach(el => availableMoves.push(el))
-            // if current board cell has value 2 or -2
         } else if (board[curRowIdx][curColIdx] === turn * 2) {
-            console.log("Its a KING")
             let results = []
             let aheadResults = checkMoveAhead(currentElId)
             let behindResults = checkMoveBehind(currentElId)
@@ -517,14 +436,8 @@ define([
             }
 
         }
-
-
         let mJumps = mandatoryJumps([currentElId])
-        // highlighting available cells upon results:
         if (mJumps.length == 0) {
-            console.log("CHOOSE YOUR MOVE:", availableMoves)
-            // updating highlighted cells array. Will need to remove highlight once another event occurs 
-
             highlightCells = availableMoves
             chosenPiece = currentElId
             availableMoves.forEach((elId) => {
@@ -532,10 +445,7 @@ define([
 
                 currentActiveCell.addEventListener('click', processMove)
             })
-
             emptyCellHighlighter(availableMoves)
-            console.log("Allowed moves return")
-
             return availableMoves
         } else {
             console.log("YOU MUST JUMP:", mJumps)
@@ -547,15 +457,9 @@ define([
                 console.log(chosenPiece)
                 currentActiveCell.addEventListener('click', processMove)
             })
-
-            console.log("Allowed moves return, HAVE TO JUMP")
             return mJumps
         }
-
-
-
     }
-
 
     function checkMoveAhead(idString) {
         console.log("Check move ahead run...", idString)
@@ -572,8 +476,6 @@ define([
                 emptyCellsAhead.push(checkCellsIds[idx])
             }
         })
-        // Return empty cells for move inside the board
-        console.log("CheckmoveAhead return...", emptyCellsAhead)
         return emptyCellsAhead
     }
     function checkMoveBehind(idString) {
@@ -591,12 +493,9 @@ define([
                 emptyCellsBehind.push(checkCellsIds[idx])
             }
         })
-        // Return empty cells for move inside the board
-        console.log("Check move behind return...", emptyCellsBehind)
         return emptyCellsBehind
     }
     function checkOpAhead(idString) {
-        console.log("Check move ahead run...", idString)
         let opCellsAhead = []
         let curRowIdx = parseInt(idString[1])
         let curColIdx = parseInt(idString[3])
@@ -610,13 +509,10 @@ define([
                 opCellsAhead.push(checkCellsIds[idx])
             }
         })
-        // Return empty cells for move inside the board
-        console.log("CheckOpAhead return...", opCellsAhead)
         return opCellsAhead
     }
 
     function checkOpBehind(idString) {
-        console.log("Check move behind run...", idString)
         let opCellsBehind = []
         let curRowIdx = parseInt(idString[1])
         let curColIdx = parseInt(idString[3])
@@ -630,18 +526,14 @@ define([
                 opCellsBehind.push(checkCellsIds[idx])
             }
         })
-        // Return empty cells for move inside the board
-        console.log("Check move behind return...", opCellsBehind)
         return opCellsBehind
     }
 
     function checkEmptyAheadOneAfter(idString, oppAhead = []) {
         console.log("checkEmptyAheadOneAfter run", idString, oppAhead)
         let mayJump = []
-        // currentId(idString) = 'r5c2'
         let curRowIdx = parseInt(idString[1])
         let curColIdx = parseInt(idString[3])
-        // opAhead = ['r4c3']
         for (let i = 0; i < oppAhead.length; i++) {
             let opRow = parseInt(oppAhead[i][1])
             console.log("opRow:", opRow)
@@ -660,17 +552,13 @@ define([
                 mayJump.push(`r${opRow + turn}c${checkCol}`)
             }
         }
-        console.log("checkEmptyAheadOneAfter return, may jump here:", mayJump)
         return mayJump
     }
 
     function checkEmptyBehindOneAfter(idString, oppBehind) {
-        console.log("ccheckEmptyBehindOneAfter run", idString, oppBehind)
         let mayJump = []
-        // currentId(idString) = 'r5c2'
         let curRowIdx = parseInt(idString[1])
         let curColIdx = parseInt(idString[3])
-        // opAhead = ['r4c3']
         if (!oppBehind) { return }
         for (let i = 0; i < oppBehind.length; i++) {
             let opRow = parseInt(oppBehind[i][1])
@@ -682,11 +570,8 @@ define([
                 mayJump.push(`r${opRow - turn}c${checkCol}`)
             }
         }
-        console.log("checkEmptyBehindOneAfter return, may jump here:", mayJump)
         return mayJump
     }
-
-
 
     function emptyCellHighlighter(array) {
         array.forEach((elId) => {
@@ -714,19 +599,12 @@ define([
 
     function mandatoryJumps(array) {
         console.log("mandatoryJumps run with argument...", array, turn)
-
-        // function have to check if any mandatory jumps must be made // accepting array of pieces to check. 
-        // different behavior for regular and kings pieces
         let haveToJumpPieces = []
         let mandatoryJumpsArr = []
         for (let i = 0; i < array.length; i++) {
             let curRowIdx = parseInt(array[i][1])
             let curColIdx = parseInt(array[i][3])
-
-
-            // if a regular piece
             if (board[curRowIdx][curColIdx] === turn) {
-                //check if any diagonal cells next to current occupied by another player, and if diagonal cells next to them are empty
                 let opAhead = checkOpAhead(array[i])
                 let emptyAheadAfterOp = checkEmptyAheadOneAfter(array[i], opAhead)
                 if (emptyAheadAfterOp) {
@@ -735,7 +613,6 @@ define([
                         haveToJumpPieces.push(array[i])
                     })
                 }
-                // if King
             } else if (board[curRowIdx][curColIdx] === turn * 2) {
                 let opAhead = checkOpAhead(array[i])
                 let emptyAheadAfterOp = checkEmptyAheadOneAfter(array[i], opAhead)
@@ -757,11 +634,8 @@ define([
 
         }
         mustJumpPieces = haveToJumpPieces
-
         console.log("mandatory jumps return", mandatoryJumpsArr, haveToJumpPieces)
-        // function must return an array of indexes requiring a jump
         return mandatoryJumpsArr
-
     }
 
     function checkWinner(board) {
@@ -777,7 +651,6 @@ define([
             winner = turn * -1
         }
     }
-
 
 })
 
