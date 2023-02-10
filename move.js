@@ -2,7 +2,6 @@ define([
 
 ], function (require, render) {
     'use strict';
-    // render function must use cellState object and board array to update board view according to current game state
 
     const cellState = {
         '1': { 'class': 'blue', 'html': "<span></span>", 'activePiece': 'blueA' },
@@ -28,49 +27,31 @@ define([
     let winner = null
     let turn = 1
     let moveCounter = 0
-    // let board = [
-    //     [0, 1, 0, 1, 0, 1, 0, 1],
-    //     [1, 0, 1, 0, 1, 0, 1, 0],
-    //     [0, 1, 0, 1, 0, 1, 0, 1],
-    //     [0, 0, 0, 0, 0, 0, 0, 0],
-    //     [0, 0, 0, 0, 0, 0, 0, 0],
-    //     [-1, 0, -1, 0, -1, 0, -1, 0],
-    //     [0, -1, 0, -1, 0, -1, 0, -1],
-    //     [-1, 0, -1, 0, -1, 0, -1, 0]
-    // ]
+    let board = [
+        [0, 1, 0, 1, 0, 1, 0, 1],
+        [1, 0, 1, 0, 1, 0, 1, 0],
+        [0, 1, 0, 1, 0, 1, 0, 1],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [-1, 0, -1, 0, -1, 0, -1, 0],
+        [0, -1, 0, -1, 0, -1, 0, -1],
+        [-1, 0, -1, 0, -1, 0, -1, 0]
+    ]
 
     // Demonstaration board
 
-    let board = [
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [1, 0, 1, 0, 1, 0, 1, 0],
-        [0, 1, 0, 0, 0, 1, 0, 1],
-        [-1,0,-1, 0,-1, 0,-1, 0],
-        [0,-1, 0, 0, 0,-1, 0,-1],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0,-1, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0]
-    ]
+    // let board = [
+    //     [0, 0, 0, 0, 0, 0, 0, 0],
+    //     [1, 0, 1, 0, 1, 0, 1, 0],
+    //     [0, 1, 0, 0, 0, 1, 0, 1],
+    //     [-1,0,-1, 0,-1, 0,-1, 0],
+    //     [0,-1, 0, 0, 0,-1, 0,-1],
+    //     [0, 0, 0, 0, 0, 0, 0, 0],
+    //     [0,-1, 0, 0, 0, 0, 0, 0],
+    //     [0, 0, 0, 0, 0, 0, 0, 0]
+    // ]
 
-    /////////////////// Functions ////////////////////
-    // function generateBoard() {
-    //     let newId = ''
-    //     let sectionBoard = document.getElementById('board')
-    //     board.forEach((row, rowIdx) => {
-    //         row.forEach((cell, cellIdx) => {
-    //             let newDiv = document.createElement('div')
-    //             newId = `r${rowIdx}c${cellIdx}`
-    //             console.log(newDiv)
-    //             newDiv.setAttribute('id', newId)
-    //             sectionBoard.appendChild(newDiv)
-    //             if (rowIdx % 2 === 0 && cellIdx % 2 === 1) {
-    //                 newDiv.style.backgroundColor = "rgb(122, 137, 181)"
-    //             } else if (rowIdx % 2 === 1 && cellIdx % 2 === 0) {
-    //                 newDiv.style.backgroundColor = "rgb(122, 137, 181)"
-    //             }
-    //         })
-    //     })
-    // }
+
 
 
     init()
@@ -249,93 +230,7 @@ define([
         tieMsg.style.visibility = "hidden"
         }
     }
-
-    function processMove(evt) {
-        chosenCell = evt.target.parentNode.getAttribute('id')
-        pieceHighlightRemove(currentMoveActivePieces)
-        currentMoveActivePieces = []
-        emptyCellHighlightRemove(highlightCells)
-        highlightCells = []
-        boardUpdate(chosenPiece, chosenCell)
-    }
-
-    function boardUpdate(cellFrom, cellTo) {
-        let currentRow = parseInt(cellFrom[1])
-        let newRow = parseInt(cellTo[1])
-        if (currentRow + 1 === newRow || currentRow - 1 === newRow) {
-            moveOnBoard(cellFrom, cellTo)
-            moveCounter += 1
-        } else if (currentRow + 2 === newRow || currentRow - 2 === newRow) {
-            jumpOnBoard(cellFrom, cellTo)
-            moveCounter = 0
-        }
-    }
-
-
-    function moveOnBoard(cellFrom, cellTo) {
-
-        let currentRow = parseInt(cellFrom[1])
-        let newRow = parseInt(cellTo[1])
-        let currentCol = parseInt(cellFrom[3])
-        let newCol = parseInt(cellTo[3])
-        let currentValue = board[currentRow][currentCol]
-        //If piece reaches last row as a result of the move it turns into a king:
-        if ((turn === -1 && newRow === 0) || (turn === 1 && newRow === 7)) {
-            if (board[currentRow][currentCol] === turn) {
-                console.log("TURNING INTO KING!!!")
-                board[newRow][newCol] = turn * 2
-                console.log(board[newRow][newCol])
-            } else if (board[currentRow][currentCol] === turn * 2) {
-                console.log("THIS IS KING ALREADY!!!")
-                board[newRow][newCol] = currentValue
-                board[currentRow][currentCol] = 0
-                init()
-            }
-        } else {
-            board[newRow][newCol] = currentValue
-        }
-
-        board[currentRow][currentCol] = 0
-        turn = turn * -1
-        init()
-    }
-
-    function jumpOnBoard(cellFrom, cellTo) {
-        console.log("Updating BOARD after jump move..", cellFrom, cellTo)
-        let currentRow = parseInt(cellFrom[1])
-        let newRow = parseInt(cellTo[1])
-        let currentCol = parseInt(cellFrom[3])
-        let newCol = parseInt(cellTo[3])
-        let currentValue = board[currentRow][currentCol]
-
-        let opCol = (newCol - currentCol) / 2 + currentCol
-        let opRow = (newRow - currentRow) / 2 + currentRow
-        board[opRow][opCol] = 0;
-        //If piece reaches last row as a result of the jump it turns into a king:
-        if ((turn === -1 && newRow === 0) || (turn === 1 && newRow === 7)) {
-            if (board[currentRow][currentCol] === turn) {
-                console.log("TURNING INTO KING!!!")
-                board[newRow][newCol] = turn * 2
-                board[currentRow][currentCol] = 0
-                mightHaveToJumpPieces.push(cellTo)
-                init()
-            } else if (board[currentRow][currentCol] === turn * 2) {
-                console.log("THIS IS KING ALREADY!!!")
-                board[newRow][newCol] = currentValue
-                board[currentRow][currentCol] = 0
-                mightHaveToJumpPieces.push(cellTo)
-                init()
-            }
-        } else {
-            board[newRow][newCol] = currentValue
-            board[currentRow][currentCol] = 0
-            mightHaveToJumpPieces.push(cellTo)
-            init()
-        }
-
-
-    }
-
+    
     function highlightPieces(mjArray) {
         console.log("highlightPieces run...")
         if (mjArray) {
@@ -425,12 +320,12 @@ define([
                 let newId = `r${i}c${idx}`
                 idArray.push(newId)
             })
-
+            
         })
         return idArray
     }
-
-
+    
+    
     function allowedMoves(evt) {
         let availableMoves = []
         let cellCont = evt.target.parentNode
@@ -454,7 +349,7 @@ define([
             if (behindResults) {
                 behindResults.forEach(el => availableMoves.push(el))
             }
-
+            
         }
         let mJumps = mandatoryJumps([currentElId])
         if (mJumps.length == 0) {
@@ -503,7 +398,7 @@ define([
         let emptyCellsBehind = []
         let curRowIdx = parseInt(idString[1])
         let curColIdx = parseInt(idString[3])
-
+        
         if (!board[curRowIdx - turn]) { return }
         let checkRow = curRowIdx - turn
         let checkCellsVals = [board[checkRow][curColIdx + 1], board[checkRow][curColIdx - 1]]
@@ -536,7 +431,7 @@ define([
         let opCellsBehind = []
         let curRowIdx = parseInt(idString[1])
         let curColIdx = parseInt(idString[3])
-
+        
         if (!board[curRowIdx - turn]) { return }
         let checkRow = curRowIdx - turn
         let checkCellsVals = [board[checkRow][curColIdx + 1], board[checkRow][curColIdx - 1]]
@@ -559,7 +454,7 @@ define([
             console.log("opRow:", opRow)
             let opCol = parseInt(oppAhead[i][3])
             console.log("opCol:", opCol)
-
+            
             if (!board[opRow + turn]) {
                 console.log("Guard!!!")
                 return
@@ -574,7 +469,7 @@ define([
         }
         return mayJump
     }
-
+    
     function checkEmptyBehindOneAfter(idString, oppBehind) {
         let mayJump = []
         let curRowIdx = parseInt(idString[1])
@@ -600,7 +495,7 @@ define([
             let dashedCircle = document.createElement('span')
             dashedCircle.classList.add(addClass)
             currentActiveCell.appendChild(dashedCircle)
-
+            
         })
 
     }
@@ -612,8 +507,8 @@ define([
             console.log(currentActiveCell)
             currentActiveCell.innerHTML = ''
             currentActiveCell.removeEventListener('click', processMove)
-
-
+            
+            
         })
     }
 
@@ -651,7 +546,7 @@ define([
                     })
                 }
             }
-
+            
         }
         mustJumpPieces = haveToJumpPieces
         console.log("mandatory jumps return", mandatoryJumpsArr, haveToJumpPieces)
@@ -671,19 +566,103 @@ define([
             winner = turn * -1
         }
     }
-
+    
 })
 
 
-define(function () {
 
+    function processMove(evt) {
+        chosenCell = evt.target.parentNode.getAttribute('id')
+        pieceHighlightRemove(currentMoveActivePieces)
+        currentMoveActivePieces = []
+        emptyCellHighlightRemove(highlightCells)
+        highlightCells = []
+        boardUpdate(chosenPiece, chosenCell)
+    }
+
+    function boardUpdate(cellFrom, cellTo) {
+        let currentRow = parseInt(cellFrom[1])
+        let newRow = parseInt(cellTo[1])
+        if (currentRow + 1 === newRow || currentRow - 1 === newRow) {
+            moveOnBoard(cellFrom, cellTo)
+            moveCounter += 1
+        } else if (currentRow + 2 === newRow || currentRow - 2 === newRow) {
+            jumpOnBoard(cellFrom, cellTo)
+            moveCounter = 0
+        }
+    }
+
+
+    function moveOnBoard(cellFrom, cellTo) {
+
+        let currentRow = parseInt(cellFrom[1])
+        let newRow = parseInt(cellTo[1])
+        let currentCol = parseInt(cellFrom[3])
+        let newCol = parseInt(cellTo[3])
+        let currentValue = board[currentRow][currentCol]
+        //If piece reaches last row as a result of the move it turns into a king:
+        if ((turn === -1 && newRow === 0) || (turn === 1 && newRow === 7)) {
+            if (board[currentRow][currentCol] === turn) {
+                board[newRow][newCol] = turn * 2
+                console.log(board[newRow][newCol])
+            } else if (board[currentRow][currentCol] === turn * 2) {
+
+                board[newRow][newCol] = currentValue
+                board[currentRow][currentCol] = 0
+                init()
+            }
+        } else {
+            board[newRow][newCol] = currentValue
+        }
+
+        board[currentRow][currentCol] = 0
+        turn = turn * -1
+        init()
+    }
+
+    function jumpOnBoard(cellFrom, cellTo) {
+        console.log("Updating BOARD after jump move..", cellFrom, cellTo)
+        let currentRow = parseInt(cellFrom[1])
+        let newRow = parseInt(cellTo[1])
+        let currentCol = parseInt(cellFrom[3])
+        let newCol = parseInt(cellTo[3])
+        let currentValue = board[currentRow][currentCol]
+
+        let opCol = (newCol - currentCol) / 2 + currentCol
+        let opRow = (newRow - currentRow) / 2 + currentRow
+        board[opRow][opCol] = 0;
+        //If piece reaches last row as a result of the jump it turns into a king:
+        if ((turn === -1 && newRow === 0) || (turn === 1 && newRow === 7)) {
+            if (board[currentRow][currentCol] === turn) {
+                board[newRow][newCol] = turn * 2
+                board[currentRow][currentCol] = 0
+                mightHaveToJumpPieces.push(cellTo)
+                init()
+            } else if (board[currentRow][currentCol] === turn * 2) {
+                board[newRow][newCol] = currentValue
+                board[currentRow][currentCol] = 0
+                mightHaveToJumpPieces.push(cellTo)
+                init()
+            }
+        } else {
+            board[newRow][newCol] = currentValue
+            board[currentRow][currentCol] = 0
+            mightHaveToJumpPieces.push(cellTo)
+            init()
+        }
+
+
+    }
+
+define(function () {
+    
     return {
         // add here what to export
         board,
         cells,
         mandatoryJumps,
         allowedMoves
-
-
+        
+        
     }
 });

@@ -8,25 +8,22 @@ board = [
     [0, -1, 0, -1, 0, -1, 0, -1],
     [-1, 0, -1, 0, -1, 0, -1, 0]
 ]
-function generateBoard() {
-    let newId = ''
-    let sectionBoard = document.getElementById('board') 
-    board.forEach((row,rowIdx) => {
-        row.forEach((cell, cellIdx) => {
-            let newDiv = document.createElement('div')
-            newDiv.setAttribute('id', `r${row}c${cellIdx}}`)
-            sectionBoard.appendChild(newDiv)
-            cellBackground(row,cellIdx,newDiv)
+    /////////////////// Functions ////////////////////
+    function generateBoard() {
+        let newId = ''
+        let sectionBoard = document.getElementById('board')
+        board.forEach((row, rowIdx) => {
+            row.forEach((cell, cellIdx) => {
+                let newDiv = document.createElement('div')
+                newId = `r${rowIdx}c${cellIdx}`
+                console.log(newDiv)
+                newDiv.setAttribute('id', newId)
+                sectionBoard.appendChild(newDiv)
+                if (rowIdx % 2 === 0 && cellIdx % 2 === 1) {
+                    newDiv.style.backgroundColor = "rgb(122, 137, 181)"
+                } else if (rowIdx % 2 === 1 && cellIdx % 2 === 0) {
+                    newDiv.style.backgroundColor = "rgb(122, 137, 181)"
+                }
+            })
         })
-    })
-}
-
-
-function cellBackground(r,c, el) {
-    if (r % 2 === 0 && c % 2 === 0) {
-        el.style.backgroundColor = " rgb(122, 137, 181);"
-    } else if (r % 2 === 1 && c % 2 === 1) {
-        el.style.backgroundColor = " rgb(122, 137, 181);"
     }
-    
-}
